@@ -7,740 +7,214 @@
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-/* ═══════════════════════════════════════
-   ORIGINAL THEME — PRESERVED
-═══════════════════════════════════════ */
 :root {
-  --bg:       #f0f2f7;
-  --bg2:      #e8eaf2;
-  --bg3:      #dde0ec;
-  --surface:  #ffffff;
-  --surface2: #f5f6fa;
-  --border:   #e0e3ef;
-  --border2:  #c8ccde;
-  --text:     #1a1d2e;
-  --text2:    #5a6080;
-  --text3:    #9ba3c2;
-  --blue:     #3b6ff5;
-  --blue-bg:  rgba(59,111,245,.08);
-  --blue-t:   #3b6ff5;
-  --green:    #1D9E75;
-  --green-bg: rgba(29,158,117,.08);
-  --green-t:  #1D9E75;
-  --amber:    #e6a817;
-  --amber-bg: rgba(230,168,23,.1);
-  --amber-t:  #b07d00;
-  --red:      #e84040;
-  --red-bg:   rgba(232,64,64,.08);
-  --red-t:    #c02020;
-  --purple:   #7c5cfc;
-  --purple-bg:rgba(124,92,252,.08);
-  --purple-t: #7c5cfc;
-  --teal:     #0aadcc;
-  --teal-bg:  rgba(10,173,204,.08);
-  --teal-t:   #0aadcc;
-  --font-head:'Raleway', sans-serif;
-  --font-body:'Plus Jakarta Sans', sans-serif;
-  --r:  10px;
-  --r2: 14px;
+  --bg:#f0f2f7;--bg2:#e8eaf2;--bg3:#dde0ec;--surface:#ffffff;--surface2:#f5f6fa;
+  --border:#e0e3ef;--border2:#c8ccde;--text:#1a1d2e;--text2:#5a6080;--text3:#9ba3c2;
+  --blue:#3b6ff5;--blue-bg:rgba(59,111,245,.08);--blue-t:#3b6ff5;
+  --green:#1D9E75;--green-bg:rgba(29,158,117,.08);--green-t:#1D9E75;
+  --amber:#e6a817;--amber-bg:rgba(230,168,23,.1);--amber-t:#b07d00;
+  --red:#e84040;--red-bg:rgba(232,64,64,.08);--red-t:#c02020;
+  --purple:#7c5cfc;--purple-bg:rgba(124,92,252,.08);--purple-t:#7c5cfc;
+  --teal:#0aadcc;--teal-bg:rgba(10,173,204,.08);--teal-t:#0aadcc;
+  --font-head:'Raleway',sans-serif;--font-body:'Plus Jakarta Sans',sans-serif;
+  --r:10px;--r2:14px;
 }
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 13px;
-  min-height: 100vh;
-}
-
-/* ═══════════════════════════════════════
-   AUTH SCREEN
-═══════════════════════════════════════ */
-#auth-screen {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #e8eaf2 0%, #d8dcee 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.auth-deco {
-  position: absolute;
-  border-radius: 50%;
-  opacity: .12;
-}
-
-.auth-deco-1 { width:500px;height:500px;background:var(--blue);top:-150px;right:-100px; }
-.auth-deco-2 { width:350px;height:350px;background:var(--green);bottom:-100px;left:-80px; }
-.auth-deco-3 { width:200px;height:200px;background:var(--purple);top:40%;left:35%; }
-
-.auth-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 36px 32px;
-  width: 420px;
-  max-width: 96vw;
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 20px 60px rgba(59,111,245,.12), 0 4px 16px rgba(0,0,0,.06);
-  animation: authIn .45s cubic-bezier(.22,1,.36,1) both;
-}
-
-@keyframes authIn {
-  from { opacity:0; transform:translateY(20px) scale(.98); }
-  to   { opacity:1; transform:none; }
-}
-
-.auth-logo-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px; height: 52px;
-  background: var(--blue);
-  border-radius: 14px;
-  font-family: var(--font-head);
-  font-weight: 900;
-  font-size: 20px;
-  color: #fff;
-  margin: 0 auto 12px;
-  box-shadow: 0 8px 24px rgba(59,111,245,.35);
-}
-
-.auth-title {
-  font-family: var(--font-head);
-  font-size: 22px;
-  font-weight: 800;
-  text-align: center;
-  letter-spacing: -.02em;
-  margin-bottom: 3px;
-}
-
-.auth-sub {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text2);
-  margin-bottom: 24px;
-}
-
-.auth-tabs {
-  display: flex;
-  background: var(--bg2);
-  border-radius: var(--r);
-  padding: 3px;
-  margin-bottom: 20px;
-  gap: 2px;
-}
-
-.auth-tab {
-  flex: 1;
-  text-align: center;
-  padding: 7px;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: var(--font-head);
-  border-radius: 7px;
-  cursor: pointer;
-  color: var(--text2);
-  transition: all .18s;
-  user-select: none;
-}
-
-.auth-tab.active {
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-
-.field-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text2);
-  margin-bottom: 5px;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  font-family: var(--font-head);
-}
-
-.field {
-  width: 100%;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r);
-  padding: 10px 13px;
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 13px;
-  outline: none;
-  transition: border-color .2s, box-shadow .2s;
-}
-
-.field:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(59,111,245,.1);
-  background: var(--surface);
-}
-
-.field::placeholder { color: var(--text3); }
-select.field { cursor: pointer; }
-textarea.field { resize: none; }
-
-.field-group { margin-bottom: 13px; }
-
-.role-grid {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 7px;
-  margin-bottom: 14px;
-}
-
-.role-card {
-  border: 1.5px solid var(--border);
-  border-radius: var(--r);
-  padding: 10px 6px;
-  text-align: center;
-  cursor: pointer;
-  transition: all .18s;
-  background: var(--surface2);
-}
-
-.role-card:hover { border-color: var(--blue); }
-
-.role-card.selected {
-  border-color: var(--blue);
-  background: var(--blue-bg);
-}
-
-.role-icon { font-size: 20px; margin-bottom: 4px; }
-.role-name { font-size: 11px; font-weight: 700; font-family: var(--font-head); }
-
-.btn-primary {
-  width: 100%;
-  background: var(--blue);
-  color: #fff;
-  border: none;
-  border-radius: var(--r);
-  padding: 12px;
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all .2s;
-  box-shadow: 0 4px 14px rgba(59,111,245,.3);
-  letter-spacing: .01em;
-}
-
-.btn-primary:hover { background:#2a5ce8; transform:translateY(-1px); box-shadow: 0 8px 20px rgba(59,111,245,.38); }
-.btn-primary:active { transform: none; }
-.btn-primary:disabled { opacity:.55; cursor:not-allowed; transform:none; }
-
-.auth-msg { text-align:center; font-size:11px; margin-top:14px; color:var(--text2); }
-.auth-msg a { color:var(--blue); cursor:pointer; }
-
-.alert-error {
-  background: var(--red-bg);
-  border: 1px solid rgba(232,64,64,.2);
-  color: var(--red-t);
-  border-radius: var(--r);
-  padding: 9px 12px;
-  font-size: 12px;
-  margin-bottom: 12px;
-  display: none;
-}
-
-/* ═══════════════════════════════════════
-   APP SHELL
-═══════════════════════════════════════ */
-#app { display: none; }
-
-.top-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(255,255,255,.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  height: 52px;
-  gap: 16px;
-}
-
-.nav-brand {
-  font-family: var(--font-head);
-  font-weight: 900;
-  font-size: 16px;
-  letter-spacing: -.02em;
-  color: var(--blue);
-}
-
-.nav-brand span { color: var(--text); }
-
-.nav-tabs { display:flex; gap:2px; flex:1; justify-content:center; }
-
-.nav-tab {
-  padding: 5px 14px;
-  border-radius: 7px;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: var(--font-head);
-  color: var(--text2);
-  cursor: pointer;
-  transition: all .15s;
-  user-select: none;
-}
-
-.nav-tab:hover  { background: var(--bg2); color: var(--text); }
-.nav-tab.active { background: var(--blue-bg); color: var(--blue); }
-
-.nav-end { display:flex; align-items:center; gap:10px; margin-left:auto; }
-
-.nav-avatar {
-  width: 30px; height: 30px;
-  border-radius: 50%;
-  background: var(--blue-bg);
-  color: var(--blue-t);
-  font-family: var(--font-head);
-  font-weight: 800;
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--blue);
-}
-
-.nav-name { font-size: 12px; font-weight: 600; color: var(--text2); }
-
-.btn-logout {
-  background: var(--red-bg);
-  border: 1px solid rgba(232,64,64,.2);
-  color: var(--red-t);
-  border-radius: 7px;
-  padding: 5px 11px;
-  font-size: 11px;
-  font-weight: 700;
-  font-family: var(--font-head);
-  cursor: pointer;
-  transition: all .18s;
-}
-
-.btn-logout:hover { background: var(--red); color: #fff; }
-
-/* ═══════════════════════════════════════
-   VIEWS
-═══════════════════════════════════════ */
-.view { display:none; padding:20px 20px 40px; max-width:1300px; margin:0 auto; }
-.view.active { display:block; }
-
-/* ═══════════════════════════════════════
-   CARDS
-═══════════════════════════════════════ */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r2);
-  padding: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.04);
-}
-
-.sec-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.sec-title {
-  font-family: var(--font-head);
-  font-weight: 800;
-  font-size: 13px;
-}
-
-.card-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  font-family: var(--font-head);
-}
-
-/* ═══════════════════════════════════════
-   GRIDS
-═══════════════════════════════════════ */
-.grid-4     { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-.grid-2     { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.grid-3     { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-.grid-admin { display:grid; grid-template-columns:1fr 320px; gap:16px; }
-.grid-main  { display:grid; grid-template-columns:1fr 280px; gap:16px; }
-
-@media(max-width:960px)  { .grid-admin,.grid-main { grid-template-columns:1fr; } }
-@media(max-width:640px)  { .grid-4 { grid-template-columns:repeat(2,1fr); } }
-
-/* ═══════════════════════════════════════
-   KPI CARDS
-═══════════════════════════════════════ */
-.kpi {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r2);
-  padding: 14px 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.04);
-}
-
-.kpi-num {
-  font-family: var(--font-head);
-  font-size: 30px;
-  font-weight: 900;
-  letter-spacing: -.04em;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.kpi-lbl { font-size: 11px; color: var(--text2); }
-
-/* ═══════════════════════════════════════
-   TABLE
-═══════════════════════════════════════ */
-.tbl { width:100%; border-collapse:collapse; font-size:12px; }
-
-.tbl th {
-  text-align: left;
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--text3);
-  padding: 0 10px 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-.tbl td {
-  padding: 10px;
-  border-bottom: 1px solid var(--bg2);
-  vertical-align: middle;
-}
-
-.tbl tr:last-child td { border-bottom: none; }
-.tbl tr:hover td { background: var(--bg2); }
-
-/* ═══════════════════════════════════════
-   BADGES & BUTTONS
-═══════════════════════════════════════ */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-  font-family: var(--font-head);
-  white-space: nowrap;
-}
-
-.badge-blue   { background:var(--blue-bg);   color:var(--blue-t); }
-.badge-green  { background:var(--green-bg);  color:var(--green-t); }
-.badge-amber  { background:var(--amber-bg);  color:var(--amber-t); }
-.badge-red    { background:var(--red-bg);    color:var(--red-t); }
-.badge-purple { background:var(--purple-bg); color:var(--purple-t); }
-.badge-teal   { background:var(--teal-bg);   color:var(--teal-t); }
-
-.btn {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 7px 13px;
-  font-family: var(--font-head);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .15s;
-  white-space: nowrap;
-}
-
-.btn:hover { background: var(--bg3); border-color: var(--border2); }
-.btn-sm    { padding: 5px 10px; font-size: 11px; }
-
-.btn-act-green { background:var(--green-bg); color:var(--green-t); border-color:rgba(29,158,117,.2); }
-.btn-act-red   { background:var(--red-bg);   color:var(--red-t);   border-color:rgba(232,64,64,.2); }
-
-/* ═══════════════════════════════════════
-   EMPLOYEE LIST
-═══════════════════════════════════════ */
-.emp-row {
-  display:flex; align-items:center; gap:10px;
-  padding:9px 0;
-  border-bottom:1px solid var(--border);
-}
-.emp-row:last-child { border-bottom:none; }
-
-.emp-avatar {
-  width:32px; height:32px;
-  border-radius:9px;
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--font-head); font-weight:800; font-size:11px;
-  flex-shrink:0;
-}
-
-.emp-name { font-weight:700; font-family:var(--font-head); font-size:12px; }
-.emp-role { font-size:11px; color:var(--text2); }
-
-/* ═══════════════════════════════════════
-   CALENDAR
-═══════════════════════════════════════ */
-.cal-nav {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:12px;
-}
-
-.cal-nav-title {
-  font-family:var(--font-head); font-weight:800; font-size:14px;
-}
-
-.btn-icon {
-  width:28px; height:28px;
-  border-radius:7px;
-  background:var(--surface2);
-  border:1px solid var(--border);
-  color:var(--text);
-  font-size:16px;
-  cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  transition:all .15s;
-  line-height:1;
-}
-.btn-icon:hover { background:var(--bg3); }
-
-.cal-grid {
-  display:grid; grid-template-columns:repeat(7,1fr); gap:3px;
-}
-
-.cal-head {
-  text-align:center; font-size:10px; font-weight:700;
-  color:var(--text3); font-family:var(--font-head);
-  padding-bottom:6px; text-transform:uppercase; letter-spacing:.04em;
-}
-
-.cal-day {
-  aspect-ratio:1; border-radius:10px;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  font-size:14px; font-weight:800;
-  position:relative; transition:all .15s;
-  gap:1px;
-}
-
-.cal-day:hover { filter: brightness(0.92); }
-.cal-today    { background:var(--blue-bg)!important; color:var(--blue)!important; font-weight:900!important; }
-.cal-selected { background:var(--blue)!important; color:#fff!important; border-color:var(--blue)!important; }
-
-/* ═══════════════════════════════════════
-   STAFF AVAILABILITY
-═══════════════════════════════════════ */
-.avail-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
-
-.avail-slot {
-  background:var(--bg2);
-  border:1.5px solid var(--border);
-  border-radius:var(--r);
-  padding:12px; cursor:pointer;
-  transition:all .15s;
-}
-
-.avail-slot:hover:not(.unavail) { border-color:var(--green); }
-.avail-slot.selected { border-color:var(--green); background:var(--green-bg); }
-.avail-slot.unavail  { opacity:.45; cursor:not-allowed; }
-.avail-dot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.avail-name { font-weight:800; font-size:12px; font-family:var(--font-head); }
-.avail-role { font-size:11px; color:var(--text2); }
-
-/* ═══════════════════════════════════════
-   MISC
-═══════════════════════════════════════ */
-.divider { height:1px; background:var(--border); margin:12px 0; }
-.scroll-area { max-height:260px; overflow-y:auto; }
-.scroll-area::-webkit-scrollbar { width:4px; }
-.scroll-area::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
-
-.toggle-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:9px 0; border-bottom:1px solid var(--border);
-}
-.toggle-row:last-child { border-bottom:none; }
-
-.toggle {
-  width:36px; height:20px; border-radius:10px;
-  background:var(--bg3); position:relative; cursor:pointer;
-  flex-shrink:0; transition:background .2s;
-}
-.toggle::after {
-  content:''; position:absolute;
-  width:14px; height:14px; border-radius:50%;
-  background:var(--text3); top:3px; left:3px;
-  transition:all .2s;
-}
-.toggle.on { background:var(--green-bg); border:1px solid rgba(29,158,117,.25); }
-.toggle.on::after { background:var(--green); left:19px; }
-
-.audit-row {
-  display:flex; gap:10px; padding:8px 0;
-  border-bottom:1px solid var(--border);
-}
-.audit-row:last-child { border-bottom:none; }
-.audit-line { width:2px; border-radius:1px; background:var(--border2); flex-shrink:0; }
-
-.req-item {
-  display:flex; align-items:center; gap:10px;
-  padding:8px 0; border-bottom:1px solid var(--border);
-}
-.req-item:last-child { border-bottom:none; }
-.req-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
-.req-info { flex:1; min-width:0; }
-.req-title { font-size:12px; font-weight:700; font-family:var(--font-head); }
-.req-sub   { font-size:11px; color:var(--text2); }
-
-.shift-row {
-  display:flex; align-items:center; gap:10px;
-  padding:9px 0; border-bottom:1px solid var(--border);
-}
-.shift-row:last-child { border-bottom:none; }
-.shift-bar  { width:3px; height:32px; border-radius:2px; flex-shrink:0; }
-.shift-name { font-size:12px; font-weight:700; font-family:var(--font-head); }
-.shift-time { font-size:11px; color:var(--text2); }
-
-.clock-panel { text-align:center; padding:20px 0 10px; }
-.clock-time  { font-size:38px; font-weight:800; font-family:var(--font-head); letter-spacing:-.04em; color:var(--blue); }
-.clock-date  { font-size:12px; color:var(--text2); margin-top:4px; }
-
-.pulse {
-  width:7px; height:7px; border-radius:50%;
-  background:var(--green);
-  animation:pulse 2s ease infinite;
-}
-@keyframes pulse {
-  0%,100% { box-shadow:0 0 0 0 rgba(29,158,117,.5); }
-  50%      { box-shadow:0 0 0 5px transparent; }
-}
-
-.donut-wrap { position:relative; display:inline-flex; }
-.donut-num  {
-  position:absolute; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--font-head); font-weight:900; font-size:16px;
-}
-
-.prog-wrap { height:5px; border-radius:3px; background:var(--bg3); overflow:hidden; }
-.prog-fill { height:100%; border-radius:3px; transition:width .5s ease; }
-
-.bar-chart { display:flex; gap:8px; height:80px; align-items:flex-end; }
-.bar-col   { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
-.bar-fill  { width:100%; border-radius:4px 4px 0 0; transition:height .5s; }
-.bar-lbl   { font-size:10px; color:var(--text3); font-family:var(--font-head); font-weight:700; }
-
-.alert {
-  border-radius:var(--r); padding:9px 12px;
-  font-size:12px; display:flex; gap:8px; align-items:flex-start;
-  margin-bottom:8px;
-}
-.alert:last-child { margin-bottom:0; }
-.alert-warn   { background:var(--amber-bg); color:var(--amber-t); border:1px solid rgba(230,168,23,.2); }
-.alert-danger { background:var(--red-bg);   color:var(--red-t);   border:1px solid rgba(232,64,64,.2); }
-
-.notif-dot {
-  width:7px; height:7px; border-radius:50%;
-  background:var(--red); position:absolute; top:-2px; right:-2px;
-}
-
-/* ═══════════════════════════════════════
-   TOAST
-═══════════════════════════════════════ */
-.toast-wrap {
-  position:fixed; bottom:24px; right:24px; z-index:9999;
-  display:flex; flex-direction:column; gap:8px; pointer-events:none;
-}
-
-.toast {
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-left-width:3px;
-  color:var(--text);
-  border-radius:10px;
-  padding:11px 15px;
-  font-size:12px; font-weight:700;
-  font-family:var(--font-head);
-  box-shadow:0 8px 24px rgba(0,0,0,.12);
-  animation:toastIn .3s ease both;
-  pointer-events:all;
-  max-width:280px;
-}
-@keyframes toastIn {
-  from { opacity:0; transform:translateY(8px); }
-  to   { opacity:1; transform:none; }
-}
-
-/* ═══════════════════════════════════════
-   RT BAR
-═══════════════════════════════════════ */
-.rt-bar {
-  background:var(--bg2);
-  border-bottom:1px solid var(--border);
-  padding:4px 20px;
-  display:flex; align-items:center; justify-content:space-between;
-  font-size:10px; color:var(--text3);
-  font-family:var(--font-head); font-weight:700;
-}
-
-.rt-dot {
-  width:6px; height:6px; border-radius:50%;
-  background:var(--green); display:inline-block;
-  margin-right:5px;
-  animation:pulse 2s ease infinite;
-}
-
-.empty { text-align:center; padding:28px 0; color:var(--text3); font-size:12px; }
-
-/* ═══════════════════════════════════════
-   SPINNER
-═══════════════════════════════════════ */
-.spin {
-  display:inline-block; width:14px; height:14px;
-  border:2px solid rgba(255,255,255,.4);
-  border-top-color:#fff; border-radius:50%;
-  animation:spinA .6s linear infinite;
-  vertical-align:middle; margin-right:6px;
-}
-@keyframes spinA { to { transform:rotate(360deg); } }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:13px;min-height:100vh;}
+
+/* AUTH */
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e8eaf2 0%,#d8dcee 100%);position:relative;overflow:hidden;}
+.auth-deco{position:absolute;border-radius:50%;opacity:.12;}
+.auth-deco-1{width:500px;height:500px;background:var(--blue);top:-150px;right:-100px;}
+.auth-deco-2{width:350px;height:350px;background:var(--green);bottom:-100px;left:-80px;}
+.auth-deco-3{width:200px;height:200px;background:var(--purple);top:40%;left:35%;}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 32px;width:420px;max-width:96vw;position:relative;z-index:1;box-shadow:0 20px 60px rgba(59,111,245,.12),0 4px 16px rgba(0,0,0,.06);animation:authIn .45s cubic-bezier(.22,1,.36,1) both;}
+@keyframes authIn{from{opacity:0;transform:translateY(20px) scale(.98);}to{opacity:1;transform:none;}}
+.auth-logo-mark{display:flex;align-items:center;justify-content:center;width:52px;height:52px;background:var(--blue);border-radius:14px;font-family:var(--font-head);font-weight:900;font-size:20px;color:#fff;margin:0 auto 12px;box-shadow:0 8px 24px rgba(59,111,245,.35);}
+.auth-title{font-family:var(--font-head);font-size:22px;font-weight:800;text-align:center;letter-spacing:-.02em;margin-bottom:3px;}
+.auth-sub{text-align:center;font-size:12px;color:var(--text2);margin-bottom:24px;}
+.auth-tabs{display:flex;background:var(--bg2);border-radius:var(--r);padding:3px;margin-bottom:20px;gap:2px;}
+.auth-tab{flex:1;text-align:center;padding:7px;font-size:12px;font-weight:700;font-family:var(--font-head);border-radius:7px;cursor:pointer;color:var(--text2);transition:all .18s;user-select:none;}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.field-label{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--font-head);}
+.field{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 13px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.field:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,111,245,.1);background:var(--surface);}
+.field::placeholder{color:var(--text3);}
+select.field{cursor:pointer;}textarea.field{resize:none;}
+.field-group{margin-bottom:13px;}
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px;}
+.role-card{border:1.5px solid var(--border);border-radius:var(--r);padding:10px 6px;text-align:center;cursor:pointer;transition:all .18s;background:var(--surface2);}
+.role-card:hover{border-color:var(--blue);}
+.role-card.selected{border-color:var(--blue);background:var(--blue-bg);}
+.role-icon{font-size:20px;margin-bottom:4px;}
+.role-name{font-size:11px;font-weight:700;font-family:var(--font-head);}
+.btn-primary{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--r);padding:12px;font-family:var(--font-head);font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(59,111,245,.3);letter-spacing:.01em;}
+.btn-primary:hover{background:#2a5ce8;transform:translateY(-1px);box-shadow:0 8px 20px rgba(59,111,245,.38);}
+.btn-primary:active{transform:none;}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+.auth-msg{text-align:center;font-size:11px;margin-top:14px;color:var(--text2);}
+.auth-msg a{color:var(--blue);cursor:pointer;}
+.alert-error{background:var(--red-bg);border:1px solid rgba(232,64,64,.2);color:var(--red-t);border-radius:var(--r);padding:9px 12px;font-size:12px;margin-bottom:12px;display:none;}
+
+/* APP SHELL */
+#app{display:none;}
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;height:52px;gap:16px;}
+.nav-brand{font-family:var(--font-head);font-weight:900;font-size:16px;letter-spacing:-.02em;color:var(--blue);}
+.nav-brand span{color:var(--text);}
+.nav-tabs{display:flex;gap:2px;flex:1;justify-content:center;}
+.nav-tab{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700;font-family:var(--font-head);color:var(--text2);cursor:pointer;transition:all .15s;user-select:none;}
+.nav-tab:hover{background:var(--bg2);color:var(--text);}
+.nav-tab.active{background:var(--blue-bg);color:var(--blue);}
+.nav-end{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.nav-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue-bg);color:var(--blue-t);font-family:var(--font-head);font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid var(--blue);}
+.nav-name{font-size:12px;font-weight:600;color:var(--text2);}
+.btn-logout{background:var(--red-bg);border:1px solid rgba(232,64,64,.2);color:var(--red-t);border-radius:7px;padding:5px 11px;font-size:11px;font-weight:700;font-family:var(--font-head);cursor:pointer;transition:all .18s;}
+.btn-logout:hover{background:var(--red);color:#fff;}
+
+/* VIEWS */
+.view{display:none;padding:20px 20px 40px;max-width:1300px;margin:0 auto;}
+.view.active{display:block;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-family:var(--font-head);font-weight:800;font-size:13px;}
+.card-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-head);}
+
+/* GRIDS */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.grid-admin{display:grid;grid-template-columns:1fr 320px;gap:16px;}
+.grid-main{display:grid;grid-template-columns:1fr 280px;gap:16px;}
+@media(max-width:960px){.grid-admin,.grid-main{grid-template-columns:1fr;}}
+@media(max-width:640px){.grid-4{grid-template-columns:repeat(2,1fr);}}
+
+/* KPI */
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.kpi-num{font-family:var(--font-head);font-size:30px;font-weight:900;letter-spacing:-.04em;line-height:1;margin-bottom:4px;}
+.kpi-lbl{font-size:11px;color:var(--text2);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{text-align:left;font-family:var(--font-head);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:0 10px 10px;border-bottom:1px solid var(--border);}
+.tbl td{padding:10px;border-bottom:1px solid var(--bg2);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--bg2);}
+
+/* BADGES & BUTTONS */
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--font-head);white-space:nowrap;}
+.badge-blue{background:var(--blue-bg);color:var(--blue-t);}
+.badge-green{background:var(--green-bg);color:var(--green-t);}
+.badge-amber{background:var(--amber-bg);color:var(--amber-t);}
+.badge-red{background:var(--red-bg);color:var(--red-t);}
+.badge-purple{background:var(--purple-bg);color:var(--purple-t);}
+.badge-teal{background:var(--teal-bg);color:var(--teal-t);}
+.btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 13px;font-family:var(--font-head);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn:hover{background:var(--bg3);border-color:var(--border2);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-act-green{background:var(--green-bg);color:var(--green-t);border-color:rgba(29,158,117,.2);}
+.btn-act-red{background:var(--red-bg);color:var(--red-t);border-color:rgba(232,64,64,.2);}
+
+/* EMPLOYEE LIST */
+.emp-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.emp-row:last-child{border-bottom:none;}
+.emp-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:11px;flex-shrink:0;}
+.emp-name{font-weight:700;font-family:var(--font-head);font-size:12px;}
+.emp-role{font-size:11px;color:var(--text2);}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-nav-title{font-family:var(--font-head);font-weight:800;font-size:14px;}
+.btn-icon{width:28px;height:28px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;}
+.btn-icon:hover{background:var(--bg3);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-head{text-align:center;font-size:10px;font-weight:700;color:var(--text3);font-family:var(--font-head);padding-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.cal-day{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:800;position:relative;transition:all .15s;gap:1px;}
+.cal-day:hover{filter:brightness(0.92);}
+.cal-today{background:var(--blue-bg)!important;color:var(--blue)!important;font-weight:900!important;}
+.cal-selected{background:var(--blue)!important;color:#fff!important;border-color:var(--blue)!important;}
+
+/* AVAILABILITY */
+.avail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.avail-slot{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;cursor:pointer;transition:all .15s;}
+.avail-slot:hover:not(.unavail){border-color:var(--green);}
+.avail-slot.selected{border-color:var(--green);background:var(--green-bg);}
+.avail-slot.unavail{opacity:.45;cursor:not-allowed;}
+.avail-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.avail-name{font-weight:800;font-size:12px;font-family:var(--font-head);}
+.avail-role{font-size:11px;color:var(--text2);}
+
+/* MISC */
+.divider{height:1px;background:var(--border);margin:12px 0;}
+.scroll-area{max-height:260px;overflow-y:auto;}
+.scroll-area::-webkit-scrollbar{width:4px;}
+.scroll-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--bg3);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
+.toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:var(--text3);top:3px;left:3px;transition:all .2s;}
+.toggle.on{background:var(--green-bg);border:1px solid rgba(29,158,117,.25);}
+.toggle.on::after{background:var(--green);left:19px;}
+.audit-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.audit-row:last-child{border-bottom:none;}
+.audit-line{width:2px;border-radius:1px;background:var(--border2);flex-shrink:0;}
+.req-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.req-item:last-child{border-bottom:none;}
+.req-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.req-info{flex:1;min-width:0;}
+.req-title{font-size:12px;font-weight:700;font-family:var(--font-head);}
+.req-sub{font-size:11px;color:var(--text2);}
+.shift-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.shift-row:last-child{border-bottom:none;}
+.shift-bar{width:3px;height:32px;border-radius:2px;flex-shrink:0;}
+.shift-name{font-size:12px;font-weight:700;font-family:var(--font-head);}
+.shift-time{font-size:11px;color:var(--text2);}
+.clock-panel{text-align:center;padding:20px 0 10px;}
+.clock-time{font-size:38px;font-weight:800;font-family:var(--font-head);letter-spacing:-.04em;color:var(--blue);}
+.clock-date{font-size:12px;color:var(--text2);margin-top:4px;}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(29,158,117,.5);}50%{box-shadow:0 0 0 5px transparent;}}
+.donut-wrap{position:relative;display:inline-flex;}
+.donut-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:900;font-size:16px;}
+.prog-wrap{height:5px;border-radius:3px;background:var(--bg3);overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+.alert{border-radius:var(--r);padding:9px 12px;font-size:12px;display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;}
+.alert:last-child{margin-bottom:0;}
+.alert-warn{background:var(--amber-bg);color:var(--amber-t);border:1px solid rgba(230,168,23,.2);}
+.alert-danger{background:var(--red-bg);color:var(--red-t);border:1px solid rgba(232,64,64,.2);}
+.notif-dot{width:7px;height:7px;border-radius:50%;background:var(--red);position:absolute;top:-2px;right:-2px;}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:var(--surface);border:1px solid var(--border);border-left-width:3px;color:var(--text);border-radius:10px;padding:11px 15px;font-size:12px;font-weight:700;font-family:var(--font-head);box-shadow:0 8px 24px rgba(0,0,0,.12);animation:toastIn .3s ease both;pointer-events:all;max-width:280px;}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* RT BAR */
+.rt-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:4px 20px;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--font-head);font-weight:700;}
+.rt-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;animation:pulse 2s ease infinite;}
+.empty{text-align:center;padding:28px 0;color:var(--text3);font-size:12px;}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spinA .6s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spinA{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 
 <div class="toast-wrap" id="toast-wrap"></div>
 
-<!-- ═══════════════════════════════════════════
-     AUTH SCREEN
-═══════════════════════════════════════════ -->
+<!-- AUTH SCREEN -->
 <div id="auth-screen">
   <div class="auth-deco auth-deco-1"></div>
   <div class="auth-deco auth-deco-2"></div>
   <div class="auth-deco auth-deco-3"></div>
-
   <div class="auth-card">
     <div class="auth-logo-mark">PCC</div>
     <div class="auth-title">PCC Scheduling</div>
     <div class="auth-sub">Palawan Community College · Staff &amp; Student Portal</div>
-
     <div class="auth-tabs" id="auth-tabs">
       <div class="auth-tab active" onclick="switchAuthTab('login')">Sign In</div>
       <div class="auth-tab" onclick="switchAuthTab('register')">Register</div>
     </div>
-
     <div id="auth-error" class="alert-error"></div>
 
     <!-- LOGIN -->
@@ -754,9 +228,7 @@ textarea.field { resize: none; }
         <input type="password" class="field" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign in →</button>
-      <div class="auth-msg">
-        Don't have an account? <a onclick="switchAuthTab('register')">Register here</a>
-      </div>
+      <div class="auth-msg">Don't have an account? <a onclick="switchAuthTab('register')">Register here</a></div>
     </div>
 
     <!-- REGISTER -->
@@ -808,9 +280,7 @@ textarea.field { resize: none; }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     MAIN APP
-═══════════════════════════════════════════ -->
+<!-- MAIN APP -->
 <div id="app">
   <div class="rt-bar">
     <div><span class="rt-dot"></span>Live · Google Sheets database</div>
@@ -831,7 +301,7 @@ textarea.field { resize: none; }
     </div>
   </nav>
 
-  <!-- ══════════ ADMIN DASHBOARD ══════════ -->
+  <!-- ADMIN DASHBOARD -->
   <div class="view" id="view-admin">
     <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
@@ -843,38 +313,26 @@ textarea.field { resize: none; }
         <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue)" onclick="loadData()">↻ Refresh</button>
       </div>
     </div>
-
-    <!-- KPIs -->
     <div class="grid-4" style="margin-bottom:16px">
       <div class="kpi"><div class="kpi-num" style="color:var(--blue)" id="kpi-emp">—</div><div class="kpi-lbl">Active employees</div></div>
       <div class="kpi"><div class="kpi-num" style="color:var(--green)" id="kpi-appt">—</div><div class="kpi-lbl">Total appointments</div></div>
       <div class="kpi"><div class="kpi-num" style="color:var(--amber)" id="kpi-pending">—</div><div class="kpi-lbl">Pending approval</div></div>
       <div class="kpi"><div class="kpi-num" style="color:var(--red)" id="kpi-today">—</div><div class="kpi-lbl">Today's bookings</div></div>
     </div>
-
-    <!-- BUG 2 FIX: grid-admin wrapper properly wraps both left and right columns -->
     <div class="grid-admin">
-      <!-- LEFT COLUMN -->
       <div>
-        <!-- Appointments Table -->
         <div class="card" style="margin-bottom:16px">
           <div class="sec-header">
             <div class="sec-title">All appointments</div>
-            <div style="display:flex;gap:6px;align-items:center">
-              <span class="badge badge-green" style="font-size:10px" id="admin-appt-badge">0 total</span>
-            </div>
+            <span class="badge badge-green" style="font-size:10px" id="admin-appt-badge">0 total</span>
           </div>
           <div style="overflow-x:auto">
             <table class="tbl">
-              <thead>
-                <tr><th>Student</th><th>Date</th><th>Time</th><th>Staff</th><th>Concern</th><th>Status</th><th>Actions</th></tr>
-              </thead>
+              <thead><tr><th>Student</th><th>Date</th><th>Time</th><th>Staff</th><th>Concern</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody id="admin-appt-body"></tbody>
             </table>
           </div>
         </div>
-
-        <!-- Users Table -->
         <div class="card" style="margin-bottom:16px">
           <div class="sec-header">
             <div class="sec-title">Registered users</div>
@@ -882,15 +340,11 @@ textarea.field { resize: none; }
           </div>
           <div style="overflow-x:auto">
             <table class="tbl">
-              <thead>
-                <tr><th>Name</th><th>Email</th><th>Role</th><th>Dept / Student ID</th><th>Registered</th></tr>
-              </thead>
+              <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Dept / Student ID</th><th>Registered</th></tr></thead>
               <tbody id="admin-user-body"></tbody>
             </table>
           </div>
         </div>
-
-        <!-- Appointments Chart -->
         <div class="card">
           <div class="sec-header">
             <div class="sec-title">Appointments overview</div>
@@ -917,17 +371,11 @@ textarea.field { resize: none; }
           <div id="concern-bars"></div>
         </div>
       </div>
-      <!-- END LEFT COLUMN -->
-
-      <!-- RIGHT SIDEBAR -->
       <div>
         <div class="card" style="margin-bottom:12px">
-          <div class="sec-header">
-            <div class="sec-title">Employees</div>
-          </div>
+          <div class="sec-header"><div class="sec-title">Employees</div></div>
           <div id="emp-list" class="scroll-area"></div>
         </div>
-
         <div class="card" style="margin-bottom:12px">
           <div class="sec-header">
             <div class="sec-title">System guardrails</div>
@@ -950,7 +398,6 @@ textarea.field { resize: none; }
             <div class="toggle on" onclick="this.classList.toggle('on')"></div>
           </div>
         </div>
-
         <div class="card">
           <div class="sec-header">
             <div class="sec-title">Audit trail</div>
@@ -959,13 +406,10 @@ textarea.field { resize: none; }
           <div id="audit-list"></div>
         </div>
       </div>
-      <!-- END RIGHT SIDEBAR -->
-
     </div>
-    <!-- END grid-admin — BUG 2 FIX: this closing div was missing -->
   </div>
 
-  <!-- ══════════ EMPLOYEE HUB ══════════ -->
+  <!-- EMPLOYEE HUB -->
   <div class="view" id="view-employee">
     <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
@@ -973,10 +417,8 @@ textarea.field { resize: none; }
         <div style="font-size:12px;color:var(--text2)" id="emp-date-lbl"></div>
       </div>
     </div>
-
     <div class="grid-main">
       <div>
-        <!-- Live Clock -->
         <div class="card" style="margin-bottom:16px">
           <div class="clock-panel">
             <div class="clock-time" id="live-clock"></div>
@@ -992,8 +434,6 @@ textarea.field { resize: none; }
             <div><div class="card-label">Today</div><div style="font-size:16px;font-weight:900;font-family:var(--font-head)" id="emp-today-count">—</div></div>
           </div>
         </div>
-
-        <!-- My Appointments -->
         <div class="card" style="margin-bottom:16px">
           <div class="sec-header">
             <div class="sec-title">My upcoming appointments</div>
@@ -1001,8 +441,6 @@ textarea.field { resize: none; }
           </div>
           <div id="emp-my-appts"></div>
         </div>
-
-        <!-- My Calendar -->
         <div class="card" style="margin-bottom:16px">
           <div class="cal-nav">
             <button class="btn-icon" onclick="prevMonth()">‹</button>
@@ -1017,8 +455,6 @@ textarea.field { resize: none; }
             <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--border2);margin-right:4px"></span>No work (Fri–Sun)</span>
           </div>
         </div>
-
-        <!-- Shift Swap -->
         <div class="card">
           <div class="sec-header">
             <div class="sec-title">Shift management</div>
@@ -1030,8 +466,6 @@ textarea.field { resize: none; }
           </div>
         </div>
       </div>
-
-      <!-- RIGHT SIDEBAR -->
       <div>
         <div class="card" style="margin-bottom:12px">
           <div class="sec-title" style="font-family:var(--font-head);font-weight:800;margin-bottom:12px">My performance</div>
@@ -1039,9 +473,7 @@ textarea.field { resize: none; }
             <div class="donut-wrap">
               <svg viewBox="0 0 80 80" width="80" height="80">
                 <circle cx="40" cy="40" r="30" fill="none" stroke="var(--border)" stroke-width="8"/>
-                <circle cx="40" cy="40" r="30" fill="none" stroke="#1D9E75" stroke-width="8"
-                  stroke-dasharray="169 189" stroke-dashoffset="47"
-                  stroke-linecap="round" transform="rotate(-90 40 40)"/>
+                <circle cx="40" cy="40" r="30" fill="none" stroke="#1D9E75" stroke-width="8" stroke-dasharray="169 189" stroke-dashoffset="47" stroke-linecap="round" transform="rotate(-90 40 40)"/>
               </svg>
               <div class="donut-num">89%</div>
             </div>
@@ -1060,8 +492,6 @@ textarea.field { resize: none; }
             <div class="prog-wrap"><div class="prog-fill" style="width:100%;background:var(--purple)"></div></div>
           </div>
         </div>
-
-        <!-- Request Center -->
         <div class="card" style="margin-bottom:12px">
           <div class="sec-header">
             <div class="sec-title">Request center</div>
@@ -1070,15 +500,15 @@ textarea.field { resize: none; }
           <div id="leave-form" style="display:none;margin-bottom:12px;padding:12px;background:var(--bg2);border-radius:var(--r)">
             <div style="margin-bottom:8px">
               <div class="card-label" style="margin-bottom:4px">Request type</div>
-              <select class="field" style="font-size:12px"><option>PTO — Paid time off</option><option>Sick leave</option><option>Emergency leave</option></select>
+              <select class="field" id="leave-type" style="font-size:12px"><option>PTO — Paid time off</option><option>Sick leave</option><option>Emergency leave</option></select>
             </div>
             <div class="grid-2" style="margin-bottom:8px;gap:8px">
-              <div><div class="card-label" style="margin-bottom:4px">From</div><input type="date" class="field" style="font-size:12px"></div>
-              <div><div class="card-label" style="margin-bottom:4px">To</div><input type="date" class="field" style="font-size:12px"></div>
+              <div><div class="card-label" style="margin-bottom:4px">From</div><input type="date" class="field" id="leave-from" style="font-size:12px"></div>
+              <div><div class="card-label" style="margin-bottom:4px">To</div><input type="date" class="field" id="leave-to" style="font-size:12px"></div>
             </div>
             <div style="margin-bottom:8px">
               <div class="card-label" style="margin-bottom:4px">Notes</div>
-              <textarea class="field" rows="2" style="font-size:12px" placeholder="Optional reason..."></textarea>
+              <textarea class="field" id="leave-notes" rows="2" style="font-size:12px" placeholder="Optional reason..."></textarea>
             </div>
             <div style="display:flex;gap:8px">
               <button class="btn-primary" style="border-radius:var(--r);font-size:12px;padding:8px" onclick="submitLeaveRequest()">Submit</button>
@@ -1087,8 +517,6 @@ textarea.field { resize: none; }
           </div>
           <div id="request-list"></div>
         </div>
-
-        <!-- Profile -->
         <div class="card">
           <div class="sec-title" style="font-family:var(--font-head);font-weight:800;margin-bottom:12px">Profile</div>
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
@@ -1107,7 +535,7 @@ textarea.field { resize: none; }
     </div>
   </div>
 
-  <!-- ══════════ STUDENT BOOKING ══════════ -->
+  <!-- STUDENT BOOKING -->
   <div class="view" id="view-student">
     <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
@@ -1116,10 +544,8 @@ textarea.field { resize: none; }
       </div>
       <span class="badge badge-green">Walk-ins also welcome</span>
     </div>
-
     <div class="grid-main">
       <div>
-        <!-- Calendar -->
         <div class="card" style="margin-bottom:16px">
           <div class="cal-nav">
             <button class="btn-icon" onclick="prevStudentMonth()">‹</button>
@@ -1135,8 +561,6 @@ textarea.field { resize: none; }
             <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:4px"></span>Fully booked</span>
           </div>
         </div>
-
-        <!-- Staff Availability -->
         <div class="card" style="margin-bottom:16px">
           <div class="sec-header">
             <div class="sec-title">Staff availability</div>
@@ -1146,15 +570,11 @@ textarea.field { resize: none; }
             <div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">Select a Mon–Thu date to see who is available</div>
           </div>
         </div>
-
-        <!-- Time Slots -->
         <div class="card" id="time-slot-card" style="display:none">
           <div class="sec-title" id="time-slot-title" style="font-family:var(--font-head);font-weight:800;margin-bottom:12px">Available time slots</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px" id="time-slots-grid"></div>
         </div>
       </div>
-
-      <!-- RIGHT -->
       <div>
         <div class="card" style="margin-bottom:12px">
           <div class="sec-title" style="font-family:var(--font-head);font-weight:800;margin-bottom:12px">Booking summary</div>
@@ -1183,7 +603,6 @@ textarea.field { resize: none; }
             <button class="btn-primary" style="border-radius:var(--r)" onclick="submitBooking()" id="confirm-btn">✦ Confirm booking</button>
           </div>
         </div>
-
         <div class="card">
           <div class="sec-title" style="font-family:var(--font-head);font-weight:800;margin-bottom:12px">My appointments</div>
           <div id="student-appts"></div>
@@ -1203,24 +622,21 @@ textarea.field { resize: none; }
       </div>
       <button onclick="closeModal()" style="width:28px;height:28px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
-
     <div style="margin-bottom:14px">
       <div class="card-label" style="margin-bottom:8px">✅ Available today</div>
       <div id="modal-available" style="display:grid;gap:6px"></div>
     </div>
-
     <div id="modal-absent-wrap" style="margin-bottom:16px">
       <div class="card-label" style="margin-bottom:8px">❌ Absent / On leave</div>
       <div id="modal-absent" style="display:grid;gap:6px"></div>
     </div>
-
     <button class="btn-primary" style="border-radius:var(--r)" onclick="closeModalAndSelect()">Book on this date →</button>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════
-// CONFIG — points to Vercel API routes
+// CONFIG
 // ═══════════════════════════════════════════════════════
 const API = {
   auth:         '/api/auth',
@@ -1232,21 +648,16 @@ const API = {
 // STATE
 // ═══════════════════════════════════════════════════════
 let currentUser  = null;
-let sessionToken = sessionStorage.getItem('pcc_session') || null;
 let allAppts     = [];
 let allUsers     = [];
 let refreshTimer = null;
 let selectedDate = null, selectedStaffObj = null, selectedTime = null;
-
-// Leave requests: keyed by userId → array of {type, from, to, notes, status}
 let leaveRequests = {};
-
-// Open shifts pool (dynamic — employees can claim or release)
 let openShifts = [
-  { id: 'shift-1', date: 'Mon Apr 14', dept: 'Admin Office',   time: '8AM–5PM',  claimedBy: null },
-  { id: 'shift-2', date: 'Tue Apr 15', dept: 'IT Department',  time: '1PM–5PM',  claimedBy: null },
-  { id: 'shift-3', date: 'Wed Apr 16', dept: 'Finance Office', time: '8AM–12PM', claimedBy: null },
-  { id: 'shift-4', date: 'Thu Apr 17', dept: 'Academic Affairs', time: '9AM–5PM', claimedBy: null },
+  { id:'shift-1', date:'Mon Apr 14', dept:'Admin Office',    time:'8AM–5PM',  claimedBy:null },
+  { id:'shift-2', date:'Tue Apr 15', dept:'IT Department',   time:'1PM–5PM',  claimedBy:null },
+  { id:'shift-3', date:'Wed Apr 16', dept:'Finance Office',  time:'8AM–12PM', claimedBy:null },
+  { id:'shift-4', date:'Thu Apr 17', dept:'Academic Affairs',time:'9AM–5PM',  claimedBy:null },
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -1254,26 +665,44 @@ let openShifts = [
 // ═══════════════════════════════════════════════════════
 async function apiPost(url, body) {
   const r = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body),
   });
   return r.json();
 }
-
 async function apiGet(url) {
   const r = await fetch(url);
   return r.json();
 }
 
 // ═══════════════════════════════════════════════════════
-// AUTH SCREEN HELPERS
+// SESSION PERSISTENCE
+// FIX: Store the full user object, not just id/role/email
+// ═══════════════════════════════════════════════════════
+function saveSession(user) {
+  sessionStorage.setItem('pcc_session', JSON.stringify(user));
+}
+
+function clearSession() {
+  sessionStorage.removeItem('pcc_session');
+}
+
+function loadSession() {
+  try {
+    const raw = sessionStorage.getItem('pcc_session');
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+// ═══════════════════════════════════════════════════════
+// AUTH SCREEN
 // ═══════════════════════════════════════════════════════
 let selectedRole = 'student';
 
 function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach((t, i) =>
-    t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='register'))
+  document.querySelectorAll('.auth-tab').forEach((t,i) =>
+    t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register'))
   );
   document.getElementById('login-form').style.display    = tab==='login'    ? '' : 'none';
   document.getElementById('register-form').style.display = tab==='register' ? '' : 'none';
@@ -1282,10 +711,10 @@ function switchAuthTab(tab) {
 
 function selectRole(el, role) {
   selectedRole = role;
-  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
-  document.getElementById('sid-group').style.display  = role==='student'  ? '' : 'none';
-  document.getElementById('dept-group').style.display = role!=='student'  ? '' : 'none';
+  document.getElementById('sid-group').style.display  = role==='student' ? '' : 'none';
+  document.getElementById('dept-group').style.display = role!=='student' ? '' : 'none';
 }
 
 function showError(msg) {
@@ -1295,7 +724,7 @@ function showError(msg) {
 }
 
 // ═══════════════════════════════════════════════════════
-// LOGIN
+// LOGIN — FIX: save full user object to session
 // ═══════════════════════════════════════════════════════
 async function doLogin() {
   const email    = document.getElementById('login-email').value.trim();
@@ -1307,10 +736,10 @@ async function doLogin() {
   btn.innerHTML = '<span class="spin"></span>Signing in…';
 
   try {
-    const res = await apiPost(API.auth, { action: 'login', email, password });
+    const res = await apiPost(API.auth, { action:'login', email, password });
     if (res.status === 'ok') {
-      currentUser = res.user;
-      sessionStorage.setItem('pcc_session', JSON.stringify({ id: res.user.id, role: res.user.role, email: res.user.email }));
+      currentUser = res.user; // full user object from server
+      saveSession(currentUser);
       launchApp();
     } else {
       showError(res.message || 'Invalid email or password.');
@@ -1324,7 +753,7 @@ async function doLogin() {
 }
 
 // ═══════════════════════════════════════════════════════
-// REGISTER
+// REGISTER — FIX: pass dept field correctly
 // ═══════════════════════════════════════════════════════
 async function doRegister() {
   const fname    = document.getElementById('reg-fname').value.trim();
@@ -1343,11 +772,14 @@ async function doRegister() {
 
   try {
     const res = await apiPost(API.auth, {
-      action: 'register',
-      firstName: fname, lastName: lname, email, password,
-      role: selectedRole,
-      sid:  selectedRole === 'student'  ? (sid || '—') : '—',
-      dept: selectedRole !== 'student'  ? (dept || '—') : '—',
+      action:    'register',
+      firstName: fname,
+      lastName:  lname,
+      email,
+      password,
+      role:      selectedRole,
+      sid:       selectedRole === 'student' ? (sid || '—') : '—',
+      dept:      selectedRole !== 'student' ? (dept || '—') : '—',
     });
 
     if (res.status === 'ok') {
@@ -1373,9 +805,9 @@ async function doRegister() {
 function doLogout() {
   clearInterval(refreshTimer);
   currentUser = null;
-  sessionStorage.removeItem('pcc_session');
+  clearSession();
   allAppts = []; allUsers = [];
-  document.getElementById('app').style.display = 'none';
+  document.getElementById('app').style.display         = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
 }
 
@@ -1384,7 +816,7 @@ function doLogout() {
 // ═══════════════════════════════════════════════════════
 function launchApp() {
   document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  document.getElementById('app').style.display         = 'block';
   setupNav();
   updateClock();
   setInterval(updateClock, 1000);
@@ -1395,7 +827,7 @@ function launchApp() {
 function setupNav() {
   const { role, firstName, lastName } = currentUser;
   const name     = firstName + ' ' + lastName;
-  const initials = (firstName[0] + lastName[0]).toUpperCase();
+  const initials = ((firstName||'?')[0] + (lastName||'?')[0]).toUpperCase();
 
   document.getElementById('top-avatar').textContent = initials;
   document.getElementById('top-name').textContent   = name;
@@ -1420,17 +852,17 @@ function setupNav() {
 }
 
 function showView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   const vEl = document.getElementById('view-' + name);
   if (vEl) vEl.classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t => {
     const label = t.textContent.toLowerCase();
-    if ((name==='admin' && label.includes('admin')) || (name==='employee' && label.includes('hub')) || (name==='student' && (label.includes('student')||label.includes('book'))))
+    if ((name==='admin'&&label.includes('admin'))||(name==='employee'&&label.includes('hub'))||(name==='student'&&(label.includes('student')||label.includes('book'))))
       t.classList.add('active');
   });
-  if (name === 'employee') renderEmployeeView();
-  if (name === 'student')  renderStudentView();
+  if (name==='employee') renderEmployeeView();
+  if (name==='student')  renderStudentView();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1442,18 +874,18 @@ async function loadData() {
       apiGet(API.appointments),
       apiGet(API.users),
     ]);
-    if (apptRes.status === 'ok') allAppts = apptRes.data || [];
-    if (userRes.status === 'ok') allUsers = userRes.data || [];
+    if (apptRes.status==='ok') allAppts = apptRes.data || [];
+    if (userRes.status==='ok') allUsers = userRes.data || [];
 
     document.getElementById('rt-sync').textContent =
-      'Last sync: ' + new Date().toLocaleTimeString('en-PH', {hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+      'Last sync: ' + new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
 
-    const pending = allAppts.filter(a => a['Status']==='Pending').length;
+    const pending = allAppts.filter(a=>a['Status']==='Pending').length;
     document.getElementById('notif-dot').style.display = pending ? '' : 'none';
 
-    if (currentUser?.role === 'admin')    renderAdminView();
-    if (currentUser?.role === 'employee') renderEmployeeView();
-    if (currentUser?.role === 'student')  renderStudentAppts();
+    if (currentUser?.role==='admin')    renderAdminView();
+    if (currentUser?.role==='employee') renderEmployeeView();
+    if (currentUser?.role==='student')  renderStudentAppts();
 
   } catch (e) {
     document.getElementById('rt-sync').textContent = 'Sync failed · retrying…';
@@ -1464,20 +896,20 @@ async function loadData() {
 // ADMIN RENDER
 // ═══════════════════════════════════════════════════════
 const COLORS = {
-  purple:{ bg:'var(--purple-bg)', t:'var(--purple-t)' },
-  blue:  { bg:'var(--blue-bg)',   t:'var(--blue-t)' },
-  teal:  { bg:'var(--teal-bg)',   t:'var(--teal-t)' },
-  green: { bg:'var(--green-bg)',  t:'var(--green-t)' },
-  amber: { bg:'var(--amber-bg)',  t:'var(--amber-t)' },
-  red:   { bg:'var(--red-bg)',    t:'var(--red-t)' },
+  purple:{bg:'var(--purple-bg)',t:'var(--purple-t)'},
+  blue:  {bg:'var(--blue-bg)',  t:'var(--blue-t)'},
+  teal:  {bg:'var(--teal-bg)',  t:'var(--teal-t)'},
+  green: {bg:'var(--green-bg)', t:'var(--green-t)'},
+  amber: {bg:'var(--amber-bg)', t:'var(--amber-t)'},
+  red:   {bg:'var(--red-bg)',   t:'var(--red-t)'},
 };
-const ROLE_COLOR = { admin:'red', employee:'blue', student:'green' };
+const ROLE_COLOR = {admin:'red',employee:'blue',student:'green'};
 
 function renderAdminView() {
-  const employees = allUsers.filter(u => u.role==='employee');
+  const employees = allUsers.filter(u=>u.role==='employee');
   const todayStr  = new Date().toISOString().slice(0,10);
-  const pending   = allAppts.filter(a => a['Status']==='Pending');
-  const todayApts = allAppts.filter(a => a['Date']===todayStr);
+  const pending   = allAppts.filter(a=>a['Status']==='Pending');
+  const todayApts = allAppts.filter(a=>a['Date']===todayStr);
 
   document.getElementById('kpi-emp').textContent     = employees.length;
   document.getElementById('kpi-appt').textContent    = allAppts.length;
@@ -1489,7 +921,7 @@ function renderAdminView() {
   const apptBody = document.getElementById('admin-appt-body');
   apptBody.innerHTML = allAppts.length
     ? allAppts.slice().reverse().map(a => {
-        const sc = {Confirmed:'badge-green',Pending:'badge-amber',Cancelled:'badge-red',Completed:'badge-blue'}[a['Status']] || 'badge-amber';
+        const sc = {Confirmed:'badge-green',Pending:'badge-amber',Cancelled:'badge-red',Completed:'badge-blue'}[a['Status']]||'badge-amber';
         return `<tr>
           <td style="font-weight:700;font-family:var(--font-head)">${a['Full Name']||'—'}</td>
           <td>${a['Date']||'—'}</td>
@@ -1512,12 +944,12 @@ function renderAdminView() {
   const userBody = document.getElementById('admin-user-body');
   userBody.innerHTML = allUsers.length
     ? allUsers.map(u => {
-        const rc = ROLE_COLOR[u.role] || 'blue';
+        const rc = ROLE_COLOR[u.role]||'blue';
         return `<tr>
           <td style="font-weight:700;font-family:var(--font-head)">${u.firstName} ${u.lastName}</td>
           <td style="font-size:11px">${u.email}</td>
           <td><span class="badge badge-${rc}">${u.role}</span></td>
-          <td style="font-size:11px;color:var(--text2)">${u.role==='student' ? (u.sid||'—') : (u.dept||'—')}</td>
+          <td style="font-size:11px;color:var(--text2)">${u.role==='student'?(u.sid||'—'):(u.dept||'—')}</td>
           <td style="font-size:11px;color:var(--text2)">${(u.createdAt||'').slice(0,10)||'—'}</td>
         </tr>`;
       }).join('')
@@ -1525,9 +957,9 @@ function renderAdminView() {
 
   const colorKeys = ['purple','blue','teal','green','amber'];
   document.getElementById('emp-list').innerHTML = employees.length
-    ? employees.map((e, i) => {
-        const c = COLORS[colorKeys[i % colorKeys.length]];
-        const initials = (e.firstName[0]+e.lastName[0]).toUpperCase();
+    ? employees.map((e,i) => {
+        const c = COLORS[colorKeys[i%colorKeys.length]];
+        const initials = ((e.firstName||'?')[0]+(e.lastName||'?')[0]).toUpperCase();
         return `<div class="emp-row">
           <div class="emp-avatar" style="background:${c.bg};color:${c.t}">${initials}</div>
           <div style="flex:1;min-width:0">
@@ -1539,7 +971,7 @@ function renderAdminView() {
       }).join('')
     : '<div class="empty">No employees registered</div>';
 
-  document.getElementById('audit-list').innerHTML = allAppts.slice(-6).reverse().map(a =>
+  document.getElementById('audit-list').innerHTML = allAppts.slice(-6).reverse().map(a=>
     `<div class="audit-row">
       <div class="audit-line"></div>
       <div>
@@ -1547,28 +979,26 @@ function renderAdminView() {
         <div style="font-size:11px;color:var(--text2)">${a['Date']} at ${a['Time']} · <span class="badge badge-${a['Status']==='Confirmed'?'green':'amber'}" style="font-size:9px">${a['Status']}</span></div>
       </div>
     </div>`
-  ).join('') || '<div class="empty">No activity yet</div>';
+  ).join('')||'<div class="empty">No activity yet</div>';
 
   renderAdminChart();
 }
 
 async function updateApptStatus(apptId, newStatus, btn) {
-  const appt = allAppts.find(a => a['Appointment ID']===apptId);
+  const appt = allAppts.find(a=>a['Appointment ID']===apptId);
   if (!appt) return;
-
   btn.disabled = true;
   const row = [
-    appt['Appointment ID'], appt['Timestamp'], appt['Full Name'], appt['Email'],
-    appt['Student ID'], appt['Date'], appt['Time'], appt['Meet Type'],
-    appt['Concern'], appt['Description'], appt['Looking For'],
-    appt['Specific Person'], appt['Notes'], newStatus, appt['userId']
+    appt['Appointment ID'],appt['Timestamp'],appt['Full Name'],appt['Email'],
+    appt['Student ID'],appt['Date'],appt['Time'],appt['Meet Type'],
+    appt['Concern'],appt['Description'],appt['Looking For'],
+    appt['Specific Person'],appt['Notes'],newStatus,appt['userId']
   ];
-
   try {
-    const res = await apiPost(API.appointments, { action:'update', row });
-    if (res.status === 'ok') {
+    const res = await apiPost(API.appointments, {action:'update', row});
+    if (res.status==='ok') {
       appt['Status'] = newStatus;
-      toast(`Appointment ${newStatus.toLowerCase()}!`, newStatus==='Confirmed' ? 'green' : 'red');
+      toast(`Appointment ${newStatus.toLowerCase()}!`, newStatus==='Confirmed'?'green':'red');
       renderAdminView();
     }
   } catch (e) {
@@ -1585,65 +1015,47 @@ function renderAdminChart() {
   document.getElementById('chart-pending').textContent   = allAppts.filter(a=>a['Status']==='Pending').length;
   document.getElementById('chart-cancelled').textContent = allAppts.filter(a=>a['Status']==='Cancelled'||a['Status']==='Declined').length;
 
-  const days = [], counts = [];
-  for (let i=13;i>=0;i--) {
-    const d = new Date(); d.setDate(d.getDate()-i);
-    const str = d.toISOString().slice(0,10);
+  const days=[], counts=[];
+  for(let i=13;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const str=d.toISOString().slice(0,10);
     days.push(str.slice(5));
     counts.push(allAppts.filter(a=>a['Date']===str).length);
   }
-  document.getElementById('chart-period-lbl').textContent = 'Last 14 days';
+  document.getElementById('chart-period-lbl').textContent='Last 14 days';
 
-  const ctx = document.getElementById('appt-chart').getContext('2d');
-  if (apptChart) apptChart.destroy();
-  apptChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: days,
-      datasets: [{
-        label: 'Appointments',
-        data: counts,
-        backgroundColor: 'rgba(59,111,245,0.15)',
-        borderColor: '#3b6ff5',
-        borderWidth: 2,
-        borderRadius: 6,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f0f2f7' } },
-        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
-      }
-    }
+  const ctx=document.getElementById('appt-chart').getContext('2d');
+  if(apptChart) apptChart.destroy();
+  apptChart=new Chart(ctx,{
+    type:'bar',
+    data:{labels:days,datasets:[{label:'Appointments',data:counts,backgroundColor:'rgba(59,111,245,0.15)',borderColor:'#3b6ff5',borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'#f0f2f7'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
   });
 
-  const concerns = {};
-  allAppts.forEach(a => { if(a['Concern']) concerns[a['Concern']] = (concerns[a['Concern']]||0)+1; });
-  const max = Math.max(...Object.values(concerns), 1);
-  document.getElementById('concern-bars').innerHTML = Object.entries(concerns).length
-    ? Object.entries(concerns).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+  const concerns={};
+  allAppts.forEach(a=>{if(a['Concern'])concerns[a['Concern']]=(concerns[a['Concern']]||0)+1;});
+  const max=Math.max(...Object.values(concerns),1);
+  document.getElementById('concern-bars').innerHTML=Object.entries(concerns).length
+    ?Object.entries(concerns).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
         <div style="margin-bottom:8px">
           <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
-            <span style="color:var(--text2)">${k}</span>
-            <span style="font-weight:700">${v}</span>
+            <span style="color:var(--text2)">${k}</span><span style="font-weight:700">${v}</span>
           </div>
           <div class="prog-wrap"><div class="prog-fill" style="width:${(v/max*100).toFixed(0)}%;background:var(--blue)"></div></div>
         </div>`).join('')
-    : '<div style="font-size:12px;color:var(--text3)">No data yet</div>';
+    :'<div style="font-size:12px;color:var(--text3)">No data yet</div>';
 }
 
 function exportCSV() {
-  if (!allAppts.length) return toast('No data to export.', 'amber');
-  const headers = Object.keys(allAppts[0]);
-  const rows    = allAppts.map(a => headers.map(h => `"${(a[h]||'').toString().replace(/"/g,'""')}"`).join(','));
-  const csv     = [headers.join(','), ...rows].join('\n');
-  const a       = document.createElement('a');
-  a.href        = 'data:text/csv,' + encodeURIComponent(csv);
-  a.download    = 'pcc-appointments-' + new Date().toISOString().slice(0,10) + '.csv';
+  if(!allAppts.length) return toast('No data to export.','amber');
+  const headers=Object.keys(allAppts[0]);
+  const rows=allAppts.map(a=>headers.map(h=>`"${(a[h]||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv,'+encodeURIComponent(csv);
+  a.download='pcc-appointments-'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
-  toast('CSV exported!', 'green');
+  toast('CSV exported!','green');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1651,31 +1063,39 @@ function exportCSV() {
 // ═══════════════════════════════════════════════════════
 function renderEmployeeView() {
   if (!currentUser) return;
-  const fullName = currentUser.firstName + ' ' + currentUser.lastName;
-  const initials = (currentUser.firstName[0]+currentUser.lastName[0]).toUpperCase();
-  const hour = new Date().getHours();
-  const greet = hour<12 ? 'Good morning' : hour<17 ? 'Good afternoon' : 'Good evening';
+  const fullName=(currentUser.firstName||'')+' '+(currentUser.lastName||'');
+  const initials=((currentUser.firstName||'?')[0]+(currentUser.lastName||'?')[0]).toUpperCase();
+  const hour=new Date().getHours();
+  const greet=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
 
-  document.getElementById('emp-greeting').textContent = `${greet}, ${currentUser.firstName} 👋`;
-  document.getElementById('emp-avatar-big').textContent  = initials;
-  document.getElementById('emp-full-name').textContent   = fullName;
-  document.getElementById('emp-dept-display').textContent = currentUser.dept || 'Employee';
-  document.getElementById('emp-email-display').textContent = currentUser.email;
-  document.getElementById('emp-role-display').textContent  = currentUser.role.charAt(0).toUpperCase()+currentUser.role.slice(1);
+  document.getElementById('emp-greeting').textContent=`${greet}, ${currentUser.firstName} 👋`;
+  const bigAvatar=document.getElementById('emp-avatar-big');
+  if(bigAvatar) bigAvatar.textContent=initials;
+  const fnEl=document.getElementById('emp-full-name');
+  if(fnEl) fnEl.textContent=fullName;
+  const deptEl=document.getElementById('emp-dept-display');
+  if(deptEl) deptEl.textContent=currentUser.dept||'Employee';
+  const emailEl=document.getElementById('emp-email-display');
+  if(emailEl) emailEl.textContent=currentUser.email;
+  const roleEl=document.getElementById('emp-role-display');
+  if(roleEl) roleEl.textContent=(currentUser.role||'').charAt(0).toUpperCase()+(currentUser.role||'').slice(1);
 
-  const myAppts     = allAppts.filter(a => a['Specific Person']===fullName || a['Looking For']===fullName);
-  const myPending   = myAppts.filter(a => a['Status']==='Pending');
-  const todayStr    = new Date().toISOString().slice(0,10);
-  const myToday     = myAppts.filter(a => a['Date']===todayStr);
+  const myAppts   = allAppts.filter(a=>a['Specific Person']===fullName.trim()||a['Looking For']===fullName.trim());
+  const myPending = myAppts.filter(a=>a['Status']==='Pending');
+  const todayStr  = new Date().toISOString().slice(0,10);
+  const myToday   = myAppts.filter(a=>a['Date']===todayStr);
 
-  document.getElementById('emp-mine-count').textContent    = myAppts.length;
-  document.getElementById('emp-pending-count').textContent = myPending.length;
-  document.getElementById('emp-today-count').textContent   = myToday.length;
+  const mcEl=document.getElementById('emp-mine-count');
+  const pcEl=document.getElementById('emp-pending-count');
+  const tcEl=document.getElementById('emp-today-count');
+  if(mcEl) mcEl.textContent=myAppts.length;
+  if(pcEl) pcEl.textContent=myPending.length;
+  if(tcEl) tcEl.textContent=myToday.length;
 
-  const empAppts = document.getElementById('emp-my-appts');
-  empAppts.innerHTML = myAppts.length
-    ? myAppts.slice().sort((a,b)=>a['Date'].localeCompare(b['Date'])).map(a => {
-        const sc = {Confirmed:'badge-green',Pending:'badge-amber',Cancelled:'badge-red',Completed:'badge-blue'}[a['Status']]||'badge-amber';
+  const empAppts=document.getElementById('emp-my-appts');
+  if(empAppts) empAppts.innerHTML=myAppts.length
+    ?myAppts.slice().sort((a,b)=>a['Date'].localeCompare(b['Date'])).map(a=>{
+        const sc={Confirmed:'badge-green',Pending:'badge-amber',Cancelled:'badge-red',Completed:'badge-blue'}[a['Status']]||'badge-amber';
         return `<div class="shift-row">
           <div class="shift-bar" style="background:var(--green)"></div>
           <div style="flex:1">
@@ -1685,7 +1105,7 @@ function renderEmployeeView() {
           <span class="badge ${sc}">${a['Status']}</span>
         </div>`;
       }).join('')
-    : '<div class="empty">No appointments assigned to you yet</div>';
+    :'<div class="empty">No appointments assigned to you yet</div>';
 
   renderLeaveRequests();
   renderOpenShifts();
@@ -1693,147 +1113,121 @@ function renderEmployeeView() {
 }
 
 function toggleLeaveForm() {
-  const f = document.getElementById('leave-form');
-  f.style.display = f.style.display==='none' ? 'block' : 'none';
+  const f=document.getElementById('leave-form');
+  f.style.display=f.style.display==='none'?'block':'none';
 }
 
 function submitLeaveRequest() {
-  if (!currentUser) return;
-  const type  = document.querySelector('#leave-form select').value;
-  const from  = document.querySelectorAll('#leave-form input[type="date"]')[0].value;
-  const to    = document.querySelectorAll('#leave-form input[type="date"]')[1].value;
-  const notes = document.querySelector('#leave-form textarea').value.trim();
+  if(!currentUser) return;
+  const type  = document.getElementById('leave-type').value;
+  const from  = document.getElementById('leave-from').value;
+  const to    = document.getElementById('leave-to').value;
+  const notes = document.getElementById('leave-notes').value.trim();
 
-  if (!from || !to) return toast('Please select start and end dates.', 'amber');
-  if (from > to)    return toast('End date must be after start date.', 'amber');
+  if(!from||!to) return toast('Please select start and end dates.','amber');
+  if(from>to)    return toast('End date must be after start date.','amber');
 
-  const uid = currentUser.id;
-  if (!leaveRequests[uid]) leaveRequests[uid] = [];
-  leaveRequests[uid].push({ type, from, to, notes, status: 'Pending', submittedAt: new Date().toISOString() });
+  const uid=currentUser.id;
+  if(!leaveRequests[uid]) leaveRequests[uid]=[];
+  leaveRequests[uid].push({type,from,to,notes,status:'Pending',submittedAt:new Date().toISOString()});
 
-  toast('Leave request submitted!', 'green');
+  toast('Leave request submitted!','green');
   toggleLeaveForm();
-  // Reset form fields
-  document.querySelector('#leave-form select').value = 'PTO — Paid time off';
-  document.querySelectorAll('#leave-form input[type="date"]').forEach(i => i.value = '');
-  document.querySelector('#leave-form textarea').value = '';
+  document.getElementById('leave-type').value='PTO — Paid time off';
+  document.getElementById('leave-from').value='';
+  document.getElementById('leave-to').value='';
+  document.getElementById('leave-notes').value='';
   renderLeaveRequests();
 }
 
 function renderLeaveRequests() {
-  if (!currentUser) return;
-  const uid      = currentUser.id;
-  const requests = leaveRequests[uid] || [];
-  const el       = document.getElementById('request-list');
-  if (!el) return;
-
-  if (!requests.length) {
-    el.innerHTML = '<div class="empty">No requests submitted yet</div>';
-    return;
-  }
-
-  const scMap = { Pending:'badge-amber', Approved:'badge-green', Declined:'badge-red' };
-  el.innerHTML = requests.slice().reverse().map((r, ri) => {
-    const realIdx = requests.length - 1 - ri;
-    const dateRange = r.from === r.to ? r.from : r.from + ' → ' + r.to;
-    const sc = scMap[r.status] || 'badge-amber';
-    const canCancel = r.status === 'Pending';
+  if(!currentUser) return;
+  const uid=currentUser.id;
+  const requests=leaveRequests[uid]||[];
+  const el=document.getElementById('request-list');
+  if(!el) return;
+  if(!requests.length){el.innerHTML='<div class="empty">No requests submitted yet</div>';return;}
+  const scMap={Pending:'badge-amber',Approved:'badge-green',Declined:'badge-red'};
+  el.innerHTML=requests.slice().reverse().map((r,ri)=>{
+    const realIdx=requests.length-1-ri;
+    const dateRange=r.from===r.to?r.from:r.from+' → '+r.to;
+    const sc=scMap[r.status]||'badge-amber';
+    const canCancel=r.status==='Pending';
     return `<div class="req-item">
       <div class="req-icon" style="background:var(--green-bg)">🗓</div>
       <div class="req-info">
         <div class="req-title">${r.type}</div>
-        <div class="req-sub">${dateRange}${r.notes ? ' · ' + r.notes : ''}</div>
+        <div class="req-sub">${dateRange}${r.notes?' · '+r.notes:''}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
         <span class="badge ${sc}">${r.status}</span>
-        ${canCancel ? `<button class="btn btn-sm btn-act-red" style="font-size:10px;padding:3px 7px" onclick="cancelLeaveRequest(${realIdx})">Cancel</button>` : ''}
+        ${canCancel?`<button class="btn btn-sm btn-act-red" style="font-size:10px;padding:3px 7px" onclick="cancelLeaveRequest(${realIdx})">Cancel</button>`:''}
       </div>
     </div>`;
   }).join('');
 }
 
 function cancelLeaveRequest(idx) {
-  const uid = currentUser?.id;
-  if (!uid || !leaveRequests[uid]?.[idx]) return;
-  leaveRequests[uid].splice(idx, 1);
-  toast('Request cancelled.', 'amber');
+  const uid=currentUser?.id;
+  if(!uid||!leaveRequests[uid]?.[idx]) return;
+  leaveRequests[uid].splice(idx,1);
+  toast('Request cancelled.','amber');
   renderLeaveRequests();
 }
 
 function renderOpenShifts() {
-  const el = document.getElementById('open-shifts-list');
-  if (!el) return;
-  const uid      = currentUser?.id;
-  const fullName = currentUser ? currentUser.firstName + ' ' + currentUser.lastName : '';
-  const available = openShifts.filter(s => !s.claimedBy);
-  const myClaimed = openShifts.filter(s => s.claimedBy === uid);
-
-  let html = '';
-
-  if (myClaimed.length) {
-    html += `<div class="card-label" style="margin-bottom:6px;color:var(--green-t)">My claimed shifts</div>`;
-    html += myClaimed.map(s => `
+  const el=document.getElementById('open-shifts-list');
+  if(!el) return;
+  const uid=currentUser?.id;
+  const available=openShifts.filter(s=>!s.claimedBy);
+  const myClaimed=openShifts.filter(s=>s.claimedBy===uid);
+  let html='';
+  if(myClaimed.length){
+    html+=`<div class="card-label" style="margin-bottom:6px;color:var(--green-t)">My claimed shifts</div>`;
+    html+=myClaimed.map(s=>`
       <div class="req-item">
         <div class="req-icon" style="background:var(--green-bg)">✅</div>
-        <div class="req-info">
-          <div class="req-title">${s.date} · ${s.dept}</div>
-          <div class="req-sub">${s.time}</div>
-        </div>
+        <div class="req-info"><div class="req-title">${s.date} · ${s.dept}</div><div class="req-sub">${s.time}</div></div>
         <button class="btn btn-sm btn-act-red" onclick="unclaimShift('${s.id}')">Release</button>
       </div>`).join('');
-    if (available.length) html += `<div class="divider"></div><div class="card-label" style="margin-bottom:6px">Other open shifts</div>`;
+    if(available.length) html+=`<div class="divider"></div><div class="card-label" style="margin-bottom:6px">Other open shifts</div>`;
   }
-
-  if (available.length) {
-    html += available.map(s => `
+  if(available.length){
+    html+=available.map(s=>`
       <div class="req-item">
         <div class="req-icon" style="background:var(--blue-bg)">📋</div>
-        <div class="req-info">
-          <div class="req-title">${s.date} · ${s.dept}</div>
-          <div class="req-sub">${s.time}</div>
-        </div>
+        <div class="req-info"><div class="req-title">${s.date} · ${s.dept}</div><div class="req-sub">${s.time}</div></div>
         <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue)" onclick="claimShift('${s.id}')">Claim</button>
       </div>`).join('');
-  } else if (!myClaimed.length) {
-    html = '<div class="empty">No open shifts available right now</div>';
+  } else if(!myClaimed.length){
+    html='<div class="empty">No open shifts available right now</div>';
   }
-
-  el.innerHTML = html;
+  el.innerHTML=html;
 }
 
-function claimShift(shiftId) {
-  if (!currentUser) return;
-  const shift = openShifts.find(s => s.id === shiftId);
-  if (!shift || shift.claimedBy) return;
-  shift.claimedBy = currentUser.id;
-  toast(`Shift claimed: ${shift.date} · ${shift.dept}`, 'green');
+function claimShift(shiftId){
+  if(!currentUser) return;
+  const shift=openShifts.find(s=>s.id===shiftId);
+  if(!shift||shift.claimedBy) return;
+  shift.claimedBy=currentUser.id;
+  toast(`Shift claimed: ${shift.date} · ${shift.dept}`,'green');
   renderOpenShifts();
 }
-
-function unclaimShift(shiftId) {
-  const shift = openShifts.find(s => s.id === shiftId);
-  if (!shift) return;
-  shift.claimedBy = null;
-  toast('Shift released back to the pool.', 'amber');
+function unclaimShift(shiftId){
+  const shift=openShifts.find(s=>s.id===shiftId);
+  if(!shift) return;
+  shift.claimedBy=null;
+  toast('Shift released back to the pool.','amber');
   renderOpenShifts();
 }
-
-function releaseShift() {
-  if (!currentUser) return;
-  // Prompt employee to add a new open shift they want to give away
-  const date = prompt('Enter the shift date (e.g. Mon Apr 21):');
-  if (!date) return;
-  const time = prompt('Enter the time range (e.g. 8AM–5PM):');
-  if (!time) return;
-  const newShift = {
-    id: 'shift-' + Date.now(),
-    date: date.trim(),
-    dept: currentUser.dept || 'General',
-    time: time.trim(),
-    claimedBy: null,
-  };
-  openShifts.push(newShift);
-  toast('Shift posted to the open pool!', 'blue');
+function releaseShift(){
+  if(!currentUser) return;
+  const date=prompt('Enter the shift date (e.g. Mon Apr 21):');
+  if(!date) return;
+  const time=prompt('Enter the time range (e.g. 8AM–5PM):');
+  if(!time) return;
+  openShifts.push({id:'shift-'+Date.now(),date:date.trim(),dept:currentUser.dept||'General',time:time.trim(),claimedBy:null});
+  toast('Shift posted to the open pool!','blue');
   renderOpenShifts();
 }
 
@@ -1846,11 +1240,13 @@ function renderStudentView() {
 }
 
 function renderStudentAppts() {
-  if (!currentUser || currentUser.role!=='student') return;
-  const myAppts = allAppts.filter(a => a['userId']===currentUser.id || a['Email']===currentUser.email);
-  const sc = {Confirmed:'badge-green',Completed:'badge-blue',Pending:'badge-amber',Cancelled:'badge-red'};
-  document.getElementById('student-appts').innerHTML = myAppts.length
-    ? myAppts.slice().reverse().map(a =>
+  if(!currentUser||currentUser.role!=='student') return;
+  const myAppts=allAppts.filter(a=>a['userId']===currentUser.id||a['Email']===currentUser.email);
+  const sc={Confirmed:'badge-green',Completed:'badge-blue',Pending:'badge-amber',Cancelled:'badge-red'};
+  const el=document.getElementById('student-appts');
+  if(!el) return;
+  el.innerHTML=myAppts.length
+    ?myAppts.slice().reverse().map(a=>
         `<div class="req-item">
           <div class="req-icon" style="background:var(--green-bg)">📅</div>
           <div class="req-info">
@@ -1860,27 +1256,31 @@ function renderStudentAppts() {
           <span class="badge ${sc[a['Status']]||'badge-amber'}">${a['Status']}</span>
         </div>`
       ).join('')
-    : '<div class="empty">No appointments yet</div>';
+    :'<div class="empty">No appointments yet</div>';
 }
 
 // ═══════════════════════════════════════════════════════
 // BOOKING SUBMIT
+// FIX: properly uses selectedStaffObj.name and dept
 // ═══════════════════════════════════════════════════════
 async function submitBooking() {
   const concern = document.getElementById('concern-type').value;
   const desc    = document.getElementById('concern-desc').value.trim();
-  if (!concern) return toast('Please select a nature of concern.', 'amber');
-  if (!selectedDate || !selectedStaffObj || !selectedTime) return toast('Please complete your selection.', 'amber');
+  if(!concern) return toast('Please select a nature of concern.','amber');
+  if(!selectedDate||!selectedStaffObj||!selectedTime) return toast('Please complete your selection.','amber');
 
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span>Booking…';
 
-  const apptId = 'APT-' + Date.now();
+  const apptId   = 'APT-' + Date.now();
+  const fullName = (currentUser.firstName||'') + ' ' + (currentUser.lastName||'');
+  const staffName= selectedStaffObj.name;
+
   const row = [
     apptId,
     new Date().toISOString(),
-    currentUser.firstName + ' ' + currentUser.lastName,
+    fullName,
     currentUser.email,
     currentUser.sid || '—',
     selectedDate,
@@ -1888,36 +1288,42 @@ async function submitBooking() {
     'In-person',
     concern,
     desc,
-    selectedStaffObj.name,
-    selectedStaffObj.name,
+    staffName,   // Looking For
+    staffName,   // Specific Person
     '',
     'Pending',
     currentUser.id,
   ];
 
   try {
-    const res = await apiPost(API.appointments, { row });
-    if (res.status === 'ok') {
+    const res = await apiPost(API.appointments, { action:'append', row });
+    if(res.status==='ok') {
+      // Optimistically add to local state
       allAppts.push({
-        'Appointment ID':apptId,'Timestamp':row[1],'Full Name':row[2],'Email':row[3],
-        'Student ID':row[4],'Date':selectedDate,'Time':selectedTime,'Meet Type':'In-person',
-        'Concern':concern,'Description':desc,'Looking For':selectedStaffObj.name,
-        'Specific Person':selectedStaffObj.name,'Notes':'','Status':'Pending','userId':currentUser.id
+        'Appointment ID':apptId,'Timestamp':row[1],'Full Name':fullName,
+        'Email':currentUser.email,'Student ID':row[4],
+        'Date':selectedDate,'Time':selectedTime,'Meet Type':'In-person',
+        'Concern':concern,'Description':desc,
+        'Looking For':staffName,'Specific Person':staffName,
+        'Notes':'','Status':'Pending','userId':currentUser.id
       });
-      toast('Appointment booked! Awaiting admin confirmation.', 'green');
+      toast('Appointment booked! Awaiting admin confirmation.','green');
       renderStudentAppts();
+      // Reset state
       selectedDate=null; selectedStaffObj=null; selectedTime=null;
       document.getElementById('booking-summary-empty').style.display  = 'block';
       document.getElementById('booking-summary-filled').style.display = 'none';
       document.getElementById('time-slot-card').style.display = 'none';
-      document.getElementById('staff-avail-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">Select a Mon–Thu date to see who is available</div>';
-      document.getElementById('selected-date-label').textContent = 'Select a date above';
+      document.getElementById('staff-avail-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">Select a Mon–Thu date to see who is available</div>';
+      document.getElementById('selected-date-label').textContent='Select a date above';
       document.querySelectorAll('#student-calendar-grid .cal-day').forEach(el=>el.classList.remove('cal-selected'));
+      document.getElementById('concern-type').value='';
+      document.getElementById('concern-desc').value='';
     } else {
-      toast('Booking failed. Please try again.', 'red');
+      toast('Booking failed. Please try again.','red');
     }
-  } catch (e) {
-    toast('Could not connect. Check your internet connection.', 'red');
+  } catch(e) {
+    toast('Could not connect. Check your internet connection.','red');
   } finally {
     btn.disabled = false;
     btn.textContent = '✦ Confirm booking';
@@ -1925,7 +1331,36 @@ async function submitBooking() {
 }
 
 // ═══════════════════════════════════════════════════════
-// CALENDAR ENGINE — BUG 1 FIX: removed duplicate html+= render block
+// STAFF AVAILABILITY
+// FIX: pulls from allUsers (loaded from Google Sheets)
+//      Falls back to showing current user if no employees exist yet
+// ═══════════════════════════════════════════════════════
+const TIME_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'];
+
+function getStaffAvailForDay(dayName) {
+  // Get all employees from the loaded users
+  let employees = allUsers.filter(u => u.role === 'employee');
+
+  // If no employees loaded yet (e.g. just registered), show a fallback
+  if (!employees.length) {
+    return [{
+      name: 'General Staff',
+      role: 'Available',
+      avail: true,
+      slots: TIME_SLOTS,
+    }];
+  }
+
+  return employees.map(e => ({
+    name:  (e.firstName || '') + ' ' + (e.lastName || ''),
+    role:  e.dept || 'Employee',
+    avail: true, // all employees available Mon–Thu unless on leave
+    slots: TIME_SLOTS,
+  }));
+}
+
+// ═══════════════════════════════════════════════════════
+// CALENDAR ENGINE
 // ═══════════════════════════════════════════════════════
 const DAYS_SH  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS_L = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1935,41 +1370,42 @@ let empYear=todayD.getFullYear(), empMonth=todayD.getMonth();
 let stuYear=todayD.getFullYear(), stuMonth=todayD.getMonth();
 
 function isWorkDay(y,m,d) {
-  const dow = new Date(y,m,d).getDay();
-  return dow>=1 && dow<=4;
+  const dow=new Date(y,m,d).getDay();
+  return dow>=1&&dow<=4;
 }
 
-function renderCalendar(gridId, headId, titleId, year, month, type, markedAppts=[]) {
-  document.getElementById(titleId).textContent = MONTHS_L[month]+' '+year;
-  document.getElementById(headId).innerHTML = ['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="cal-head">${d}</div>`).join('');
+function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
+  const titleEl=document.getElementById(titleId);
+  if(titleEl) titleEl.textContent=MONTHS_L[month]+' '+year;
+  const headEl=document.getElementById(headId);
+  if(headEl) headEl.innerHTML=['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="cal-head">${d}</div>`).join('');
 
-  const firstDow    = new Date(year,month,1).getDay();
-  const daysInMonth = new Date(year,month+1,0).getDate();
-  const bookedDays  = [14,22];
-  let html = '';
+  const firstDow=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const bookedDays=[14,22];
+  let html='';
 
-  for (let i=0;i<firstDow;i++) html+='<div class="cal-day cal-empty"></div>';
+  for(let i=0;i<firstDow;i++) html+='<div class="cal-day cal-empty"></div>';
 
-  for (let d=1;d<=daysInMonth;d++) {
-    const work     = isWorkDay(year,month,d);
-    const isToday  = d===todayD.getDate()&&month===todayD.getMonth()&&year===todayD.getFullYear();
-    const fullBook = type==='student'&&work&&bookedDays.includes(d);
-    const clickable= work&&!fullBook&&type==='student';
-    const onclick  = clickable ? `onclick="selectStudentDate(${year},${month},${d})"` : '';
+  for(let d=1;d<=daysInMonth;d++){
+    const work    =isWorkDay(year,month,d);
+    const isToday =d===todayD.getDate()&&month===todayD.getMonth()&&year===todayD.getFullYear();
+    const fullBook=type==='student'&&work&&bookedDays.includes(d);
+    const clickable=work&&!fullBook&&type==='student';
+    const onclick=clickable?`onclick="selectStudentDate(${year},${month},${d})"` :'';
 
-    let bg='', color='', border='', label='', cursor='default';
+    let bg='',color='',border='',label='',cursor='default';
 
-    if (!work) {
+    if(!work){
       bg='#f0f0f5'; color='#bbb'; border='1px solid #e8e8f0';
-      cursor='default';
-    } else if (fullBook) {
+    } else if(fullBook){
       bg='#fff3cd'; color='#856404'; border='2px solid #ffc107';
       label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">FULL</div>';
       cursor='not-allowed';
-    } else if (type==='emp') {
-      const dateStr = year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-      const hasAppt = markedAppts.some(a=>a['Date']===dateStr);
-      if (hasAppt) {
+    } else if(type==='emp'){
+      const dateStr=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const hasAppt=markedAppts.some(a=>a['Date']===dateStr);
+      if(hasAppt){
         bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
         label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">APPT</div>';
       } else {
@@ -1981,65 +1417,49 @@ function renderCalendar(gridId, headId, titleId, year, month, type, markedAppts=
       cursor='pointer';
     }
 
-    if (isToday && work) {
+    if(isToday&&work){
       bg='#dbeafe'; color='#1d4ed8'; border='2px solid #3b6ff5';
       label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">TODAY</div>';
     }
 
-    // Single render — duplicate removed (BUG 1 FIX)
     html+=`<div class="cal-day" style="background:${bg};color:${color};border:${border};border-radius:10px;cursor:${cursor};font-weight:800;font-size:14px;" ${onclick}>
       <span>${d}</span>${label}
     </div>`;
   }
 
-  document.getElementById(gridId).innerHTML = html;
+  const gridEl=document.getElementById(gridId);
+  if(gridEl) gridEl.innerHTML=html;
 }
 
 function renderStudentCalendar() {
   renderCalendar('student-calendar-grid','student-calendar-head','student-cal-title',stuYear,stuMonth,'student');
 }
 
-function prevMonth()        { if(--empMonth<0){empMonth=11;empYear--;}  renderCalendar('emp-calendar-grid','emp-calendar-head','emp-cal-title',empYear,empMonth,'emp'); }
-function nextMonth()        { if(++empMonth>11){empMonth=0;empYear++;}  renderCalendar('emp-calendar-grid','emp-calendar-head','emp-cal-title',empYear,empMonth,'emp'); }
-function prevStudentMonth() { if(--stuMonth<0){stuMonth=11;stuYear--;}  renderStudentCalendar(); }
-function nextStudentMonth() { if(++stuMonth>11){stuMonth=0;stuYear++;}  renderStudentCalendar(); }
+function prevMonth(){if(--empMonth<0){empMonth=11;empYear--;}renderCalendar('emp-calendar-grid','emp-calendar-head','emp-cal-title',empYear,empMonth,'emp');}
+function nextMonth(){if(++empMonth>11){empMonth=0;empYear++;}renderCalendar('emp-calendar-grid','emp-calendar-head','emp-cal-title',empYear,empMonth,'emp');}
+function prevStudentMonth(){if(--stuMonth<0){stuMonth=11;stuYear--;}renderStudentCalendar();}
+function nextStudentMonth(){if(++stuMonth>11){stuMonth=0;stuYear++;}renderStudentCalendar();}
 
 // ═══════════════════════════════════════════════════════
-// STAFF AVAILABILITY
+// DATE MODAL
 // ═══════════════════════════════════════════════════════
-function getStaffAvailForDay(dayName) {
-  const employees = allUsers.filter(u => u.role === 'employee');
-  const daySlots = {
-    Mon: ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'],
-    Tue: ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'],
-    Wed: ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'],
-    Thu: ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'],
-  };
-  return employees.map(e => ({
-    name: e.firstName + ' ' + e.lastName,
-    role: e.dept || 'Employee',
-    avail: true,
-    slots: daySlots[dayName] || [],
-  }));
-}
-
 let _pendingDateY, _pendingDateM, _pendingDateD;
 
-function selectStudentDate(y, m, d) {
-  _pendingDateY = y; _pendingDateM = m; _pendingDateD = d;
-  const dow     = new Date(y,m,d).getDay();
-  const dayName = DAYS_SH[dow];
-  const dateStr = MONTHS_L[m] + ' ' + d + ', ' + y;
+function selectStudentDate(y,m,d){
+  _pendingDateY=y; _pendingDateM=m; _pendingDateD=d;
+  const dow=new Date(y,m,d).getDay();
+  const dayName=DAYS_SH[dow];
+  const dateStr=MONTHS_L[m]+' '+d+', '+y;
 
-  document.getElementById('modal-date-title').textContent = dateStr + ' (' + dayName + ')';
-  document.getElementById('modal-date-sub').textContent   = 'Staff availability for this day';
+  document.getElementById('modal-date-title').textContent=dateStr+' ('+dayName+')';
+  document.getElementById('modal-date-sub').textContent='Staff availability for this day';
 
-  const staffData = getStaffAvailForDay(dayName);
-  const available = staffData.filter(s => s.avail);
-  const absent    = staffData.filter(s => !s.avail);
+  const staffData=getStaffAvailForDay(dayName);
+  const available=staffData.filter(s=>s.avail);
+  const absent   =staffData.filter(s=>!s.avail);
 
-  document.getElementById('modal-available').innerHTML = available.length
-    ? available.map(s => `
+  document.getElementById('modal-available').innerHTML=available.length
+    ?available.map(s=>`
         <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--green-bg);border:1px solid rgba(29,158,117,.2);border-radius:var(--r)">
           <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
           <div style="flex:1">
@@ -2048,10 +1468,10 @@ function selectStudentDate(y, m, d) {
           </div>
           <span class="badge badge-green">Available</span>
         </div>`).join('')
-    : '<div style="font-size:12px;color:var(--text3);padding:8px">No staff available this day</div>';
+    :'<div style="font-size:12px;color:var(--text3);padding:8px">No staff available this day</div>';
 
-  document.getElementById('modal-absent').innerHTML = absent.length
-    ? absent.map(s => `
+  document.getElementById('modal-absent').innerHTML=absent.length
+    ?absent.map(s=>`
         <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--red-bg);border:1px solid rgba(232,64,64,.15);border-radius:var(--r)">
           <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
           <div style="flex:1">
@@ -2060,36 +1480,36 @@ function selectStudentDate(y, m, d) {
           </div>
           <span class="badge badge-red">Absent</span>
         </div>`).join('')
-    : '';
+    :'';
 
-  document.getElementById('modal-absent-wrap').style.display = absent.length ? '' : 'none';
-  document.getElementById('date-modal').style.display = 'flex';
+  document.getElementById('modal-absent-wrap').style.display=absent.length?'':'none';
+  document.getElementById('date-modal').style.display='flex';
 }
 
-function closeModal() {
-  document.getElementById('date-modal').style.display = 'none';
+function closeModal(){
+  document.getElementById('date-modal').style.display='none';
 }
 
-function closeModalAndSelect() {
+function closeModalAndSelect(){
   closeModal();
-  const y = _pendingDateY, m = _pendingDateM, d = _pendingDateD;
-  document.querySelectorAll('#student-calendar-grid .cal-day').forEach(el => {
+  const y=_pendingDateY, m=_pendingDateM, d=_pendingDateD;
+  document.querySelectorAll('#student-calendar-grid .cal-day').forEach(el=>{
     el.classList.remove('cal-selected');
-    if (parseInt(el.querySelector('span')?.textContent)===d && isWorkDay(y,m,d)) el.classList.add('cal-selected');
+    if(parseInt(el.querySelector('span')?.textContent)===d&&isWorkDay(y,m,d)) el.classList.add('cal-selected');
   });
-  const dow     = new Date(y,m,d).getDay();
-  const dayName = DAYS_SH[dow];
-  selectedDate  = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-  document.getElementById('selected-date-label').textContent = MONTHS_L[m]+' '+d+', '+y+' ('+dayName+')';
+  const dow=new Date(y,m,d).getDay();
+  const dayName=DAYS_SH[dow];
+  selectedDate=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  document.getElementById('selected-date-label').textContent=MONTHS_L[m]+' '+d+', '+y+' ('+dayName+')';
 
-  const staffData = getStaffAvailForDay(dayName);
-  const grid = document.getElementById('staff-avail-grid');
-  grid.innerHTML = staffData.map((s,i) => {
-    const dot  = s.avail ? 'var(--green)' : 'var(--border2)';
-    const hint = s.avail ? s.slots.length+' slot'+(s.slots.length!==1?'s':'')+' available' : 'On leave / unavailable';
-    const hc   = s.avail ? 'var(--green-t)' : 'var(--text3)';
-    const cls  = 'avail-slot'+(s.avail?'':' unavail');
-    const click= s.avail ? `onclick="selectStaff(${i},'${dayName}')"` : '';
+  const staffData=getStaffAvailForDay(dayName);
+  const grid=document.getElementById('staff-avail-grid');
+  grid.innerHTML=staffData.map((s,i)=>{
+    const dot =s.avail?'var(--green)':'var(--border2)';
+    const hint=s.avail?s.slots.length+' slot'+(s.slots.length!==1?'s':'')+' available':'On leave / unavailable';
+    const hc  =s.avail?'var(--green-t)':'var(--text3)';
+    const cls ='avail-slot'+(s.avail?'':' unavail');
+    const click=s.avail?`onclick="selectStaff(${i},'${dayName}')"` :'';
     return `<div class="${cls}" id="staff-slot-${i}" ${click}>
       <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
         <div class="avail-dot" style="background:${dot}"></div>
@@ -2100,53 +1520,51 @@ function closeModalAndSelect() {
     </div>`;
   }).join('');
 
-  document.getElementById('time-slot-card').style.display = 'none';
-  document.getElementById('booking-summary-empty').style.display  = 'block';
-  document.getElementById('booking-summary-filled').style.display = 'none';
+  document.getElementById('time-slot-card').style.display='none';
+  document.getElementById('booking-summary-empty').style.display ='block';
+  document.getElementById('booking-summary-filled').style.display='none';
   selectedStaffObj=null; selectedTime=null;
 }
 
-function selectStaff(i, dayName) {
+function selectStaff(i,dayName){
   document.querySelectorAll('.avail-slot').forEach(el=>el.classList.remove('selected'));
   document.getElementById('staff-slot-'+i)?.classList.add('selected');
-  const staffData = getStaffAvailForDay(dayName);
-  const staff = staffData[i];
-  if (!staff||!staff.avail) return;
-  selectedStaffObj = staff;
-
-  document.getElementById('time-slot-title').textContent = 'Time slots with '+staff.name;
-  document.getElementById('time-slots-grid').innerHTML = staff.slots.map(t =>
+  const staffData=getStaffAvailForDay(dayName);
+  const staff=staffData[i];
+  if(!staff||!staff.avail) return;
+  selectedStaffObj=staff;
+  document.getElementById('time-slot-title').textContent='Time slots with '+staff.name;
+  document.getElementById('time-slots-grid').innerHTML=staff.slots.map(t=>
     `<button class="btn" style="font-size:12px;padding:9px" onclick="selectSlot(this,'${t}')">${t}</button>`
   ).join('');
-  document.getElementById('time-slot-card').style.display = 'block';
+  document.getElementById('time-slot-card').style.display='block';
 }
 
-function selectSlot(btn, time) {
-  document.querySelectorAll('#time-slots-grid .btn').forEach(b => {
+function selectSlot(btn,time){
+  document.querySelectorAll('#time-slots-grid .btn').forEach(b=>{
     b.style.background=''; b.style.color=''; b.style.borderColor='';
   });
   btn.style.background='var(--blue)'; btn.style.color='#fff'; btn.style.borderColor='var(--blue)';
-  selectedTime = time;
-  if (!selectedStaffObj||!selectedDate) return;
-  document.getElementById('summary-content').innerHTML = `
+  selectedTime=time;
+  if(!selectedStaffObj||!selectedDate) return;
+  document.getElementById('summary-content').innerHTML=`
     <div style="display:grid;gap:7px;font-size:12px">
       <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Date</span><span style="font-weight:700">${selectedDate}</span></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Time</span><span style="font-weight:700">${time}</span></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Staff</span><span style="font-weight:700">${selectedStaffObj.name}</span></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Dept</span><span style="font-weight:700">${selectedStaffObj.role}</span></div>
     </div>`;
-  document.getElementById('booking-summary-empty').style.display  = 'none';
-  document.getElementById('booking-summary-filled').style.display = 'block';
+  document.getElementById('booking-summary-empty').style.display ='none';
+  document.getElementById('booking-summary-filled').style.display='block';
 }
 
 // ═══════════════════════════════════════════════════════
 // LIVE CLOCK
 // ═══════════════════════════════════════════════════════
-function updateClock() {
-  const now = new Date();
-  const ts  = now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
-  const ds  = now.toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  // BUG 5 FIX: only update elements if they exist in the DOM
+function updateClock(){
+  const now=new Date();
+  const ts=now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+  const ds=now.toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   const cl=document.getElementById('live-clock');
   const dl=document.getElementById('live-date');
   const ad=document.getElementById('admin-date-lbl');
@@ -2160,40 +1578,32 @@ function updateClock() {
 // ═══════════════════════════════════════════════════════
 // TOAST
 // ═══════════════════════════════════════════════════════
-const TOAST_COLORS = { green:'var(--green)', amber:'var(--amber)', red:'var(--red)', blue:'var(--blue)' };
-function toast(msg, type='green') {
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.style.borderLeftColor = TOAST_COLORS[type]||TOAST_COLORS.green;
-  el.textContent = msg;
+const TOAST_COLORS={green:'var(--green)',amber:'var(--amber)',red:'var(--red)',blue:'var(--blue)'};
+function toast(msg,type='green'){
+  const el=document.createElement('div');
+  el.className='toast';
+  el.style.borderLeftColor=TOAST_COLORS[type]||TOAST_COLORS.green;
+  el.textContent=msg;
   document.getElementById('toast-wrap').appendChild(el);
-  setTimeout(()=>el.remove(), 3800);
+  setTimeout(()=>el.remove(),3800);
 }
 
 // ═══════════════════════════════════════════════════════
-// INIT — BUG 3 FIX: use found.role from server, not session.role
+// INIT — FIX: restore session from full saved user object
+// No server roundtrip needed on load; we re-validate lazily via loadData
 // ═══════════════════════════════════════════════════════
-(async function init() {
-  const saved = sessionStorage.getItem('pcc_session');
-  if (saved) {
-    try {
-      const session = JSON.parse(saved);
-      const usersRes = await apiGet(API.users);
-      if (usersRes.status === 'ok') {
-        const found = (usersRes.data||[]).find(u => u.id===session.id && u.email===session.email);
-        if (found) {
-          // BUG 3 FIX: trust found.role from server, not the client-side session.role
-          currentUser = { ...found, role: found.role };
-          launchApp();
-          return;
-        }
-      }
-    } catch (e) { /* fall through to login */ }
-    sessionStorage.removeItem('pcc_session');
+(async function init(){
+  const saved = loadSession();
+  if(saved && saved.id && saved.role && saved.email) {
+    // Restore session immediately from storage (fast)
+    currentUser = saved;
+    launchApp();
+    return;
   }
+  // No valid session — show auth screen (already visible by default)
 })();
 
-// Initial calendar render
+// Initial calendar renders (shown before login completes)
 renderCalendar('emp-calendar-grid','emp-calendar-head','emp-cal-title',empYear,empMonth,'emp');
 renderStudentCalendar();
 </script>
