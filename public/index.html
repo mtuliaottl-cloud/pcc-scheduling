@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCC Scheduling — Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 /* ═══════════════════════════════════════
    ORIGINAL THEME — PRESERVED
@@ -887,40 +888,33 @@ textarea.field { resize: none; }
           </div>
         </div>
 
-        <!-- Labor Cost -->
-        <div class="card">
-          <div class="sec-header">
-            <div class="sec-title">Labor cost analysis</div>
-            <span style="font-size:11px;color:var(--text2)">April 2025 · Budget: ₱240,000</span>
-          </div>
-          <div class="grid-2" style="margin-bottom:14px">
-            <div>
-              <div class="card-label">Spent so far</div>
-              <div style="font-size:24px;font-weight:900;color:var(--blue);font-family:var(--font-head)">₱162,400</div>
-              <div style="font-size:11px;color:var(--text2)">67.7% of monthly budget</div>
-              <div class="prog-wrap" style="margin-top:8px"><div class="prog-fill" style="width:67.7%;background:var(--blue)"></div></div>
-            </div>
-            <div>
-              <div class="card-label">Overtime hours (MTD)</div>
-              <div style="font-size:24px;font-weight:900;color:var(--amber);font-family:var(--font-head)">38 hrs</div>
-              <div style="font-size:11px;color:var(--text2)">+₱11,400 vs. plan</div>
-              <div class="prog-wrap" style="margin-top:8px"><div class="prog-fill" style="width:38%;background:var(--amber)"></div></div>
-            </div>
-          </div>
-          <div class="alert alert-warn"><span>⚠</span><span>Maria Santos has 3.5 hrs remaining before hitting weekly OT cap (40 hrs)</span></div>
-          <div class="alert alert-danger"><span>!</span><span>Jose Reyes exceeded 40-hr cap — escalation required per policy</span></div>
-          <div style="margin-top:14px">
-            <div class="card-label" style="margin-bottom:8px">Daily spend this week</div>
-            <div class="bar-chart">
-              <div class="bar-col"><div class="bar-fill" style="height:72%;background:var(--blue-bg);outline:.5px solid var(--blue)"></div><div class="bar-lbl">Mon</div></div>
-              <div class="bar-col"><div class="bar-fill" style="height:65%;background:var(--blue-bg);outline:.5px solid var(--blue)"></div><div class="bar-lbl">Tue</div></div>
-              <div class="bar-col"><div class="bar-fill" style="height:80%;background:var(--blue-bg);outline:.5px solid var(--blue)"></div><div class="bar-lbl">Wed</div></div>
-              <div class="bar-col"><div class="bar-fill" style="height:55%;background:var(--blue-bg);outline:.5px solid var(--blue)"></div><div class="bar-lbl">Thu</div></div>
-              <div class="bar-col"><div class="bar-fill" style="height:10%;background:var(--bg3)"></div><div class="bar-lbl">Fri</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
+   <!-- Appointments Chart -->
+<div class="card">
+  <div class="sec-header">
+    <div class="sec-title">Appointments overview</div>
+    <span style="font-size:11px;color:var(--text2)" id="chart-period-lbl"></span>
+  </div>
+  <div class="grid-3" style="margin-bottom:16px;text-align:center">
+    <div style="padding:12px;background:var(--green-bg);border-radius:var(--r)">
+      <div style="font-size:22px;font-weight:900;color:var(--green);font-family:var(--font-head)" id="chart-confirmed">0</div>
+      <div style="font-size:11px;color:var(--text2)">Confirmed</div>
+    </div>
+    <div style="padding:12px;background:var(--amber-bg);border-radius:var(--r)">
+      <div style="font-size:22px;font-weight:900;color:var(--amber-t);font-family:var(--font-head)" id="chart-pending">0</div>
+      <div style="font-size:11px;color:var(--text2)">Pending</div>
+    </div>
+    <div style="padding:12px;background:var(--red-bg);border-radius:var(--r)">
+      <div style="font-size:22px;font-weight:900;color:var(--red-t);font-family:var(--font-head)" id="chart-cancelled">0</div>
+      <div style="font-size:11px;color:var(--text2)">Cancelled</div>
+    </div>
+  </div>
+  <div class="card-label" style="margin-bottom:10px">Appointments by day (last 14 days)</div>
+  <canvas id="appt-chart" height="120"></canvas>
+  <div class="divider"></div>
+  <div class="card-label" style="margin-bottom:8px">By concern type</div>
+  <div id="concern-bars"></div>
+</div>
+ 
 
       <!-- RIGHT SIDEBAR -->
       <div>
@@ -1551,6 +1545,7 @@ function renderAdminView() {
       </div>
     </div>`
   ).join('') || '<div class="empty">No activity yet</div>';
+  renderAdminChart();
 }
 
 async function updateApptStatus(apptId, newStatus, btn) {
@@ -1574,9 +1569,65 @@ async function updateApptStatus(apptId, newStatus, btn) {
     }
   } catch (e) {
     toast('Update failed. Please retry.', 'red');
-  } finally {
+} finally {
     btn.disabled = false;
   }
+}
+
+let apptChart = null;
+
+function renderAdminChart() {
+  document.getElementById('chart-confirmed').textContent = allAppts.filter(a=>a['Status']==='Confirmed').length;
+  document.getElementById('chart-pending').textContent   = allAppts.filter(a=>a['Status']==='Pending').length;
+  document.getElementById('chart-cancelled').textContent = allAppts.filter(a=>a['Status']==='Cancelled'||a['Status']==='Declined').length;
+
+  const days = [], counts = [];
+  for (let i=13;i>=0;i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const str = d.toISOString().slice(0,10);
+    days.push(str.slice(5));
+    counts.push(allAppts.filter(a=>a['Date']===str).length);
+  }
+  document.getElementById('chart-period-lbl').textContent = 'Last 14 days';
+
+  const ctx = document.getElementById('appt-chart').getContext('2d');
+  if (apptChart) apptChart.destroy();
+  apptChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'Appointments',
+        data: counts,
+        backgroundColor: 'rgba(59,111,245,0.15)',
+        borderColor: '#3b6ff5',
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f0f2f7' } },
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+
+  const concerns = {};
+  allAppts.forEach(a => { if(a['Concern']) concerns[a['Concern']] = (concerns[a['Concern']]||0)+1; });
+  const max = Math.max(...Object.values(concerns), 1);
+  document.getElementById('concern-bars').innerHTML = Object.entries(concerns).length
+    ? Object.entries(concerns).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+            <span style="color:var(--text2)">${k}</span>
+            <span style="font-weight:700">${v}</span>
+          </div>
+          <div class="prog-wrap"><div class="prog-fill" style="width:${(v/max*100).toFixed(0)}%;background:var(--blue)"></div></div>
+        </div>`).join('')
+ : '<div style="font-size:12px;color:var(--text3)">No data yet</div>';
 }
 
 function exportCSV() {
@@ -1588,12 +1639,11 @@ function exportCSV() {
   a.href        = 'data:text/csv,' + encodeURIComponent(csv);
   a.download    = 'pcc-appointments-' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
-  toast('CSV exported!', 'green');
+toast('CSV exported!', 'green');
 }
 
 // ═══════════════════════════════════════════════════════
 // EMPLOYEE RENDER
-// ═══════════════════════════════════════════════════════
 function renderEmployeeView() {
   if (!currentUser) return;
   const fullName = currentUser.firstName + ' ' + currentUser.lastName;
@@ -1816,32 +1866,22 @@ function nextStudentMonth() { if(++stuMonth>11){stuMonth=0;stuYear++;}  renderSt
 // ═══════════════════════════════════════════════════════
 // STAFF AVAILABILITY DATA
 // ═══════════════════════════════════════════════════════
-const STAFF_AVAIL = {
-  Mon:[
-    {name:'Maria Santos',role:'Admin Office',avail:true,slots:['9:00 AM','10:00 AM','2:00 PM','3:00 PM']},
-    {name:'Jose Reyes',role:'IT Department',avail:true,slots:['9:00 AM','11:00 AM','2:30 PM']},
-    {name:'Carla Diaz',role:'Human Resources',avail:true,slots:['10:00 AM','1:00 PM','3:30 PM']},
-    {name:'Dan Torres',role:'Admin Office',avail:true,slots:['9:30 AM','11:00 AM']},
-  ],
-  Tue:[
-    {name:'Maria Santos',role:'Admin Office',avail:true,slots:['9:00 AM','10:30 AM','2:00 PM']},
-    {name:'Jose Reyes',role:'IT Department',avail:true,slots:['10:00 AM','3:00 PM']},
-    {name:'Ben Lim',role:'Academic Affairs',avail:true,slots:['9:00 AM','11:00 AM','2:00 PM','4:00 PM']},
-    {name:'Carla Diaz',role:'Human Resources',avail:false,slots:[]},
-  ],
-  Wed:[
-    {name:'Anna Cruz',role:'Finance Office',avail:false,slots:[]},
-    {name:'Ben Lim',role:'Academic Affairs',avail:true,slots:['9:00 AM','10:00 AM','1:00 PM']},
-    {name:'Carla Diaz',role:'Human Resources',avail:true,slots:['9:30 AM','11:30 AM','3:00 PM']},
-    {name:'Dan Torres',role:'Admin Office',avail:true,slots:['10:00 AM','2:00 PM']},
-  ],
-  Thu:[
-    {name:'Maria Santos',role:'Admin Office',avail:true,slots:['9:00 AM','2:00 PM','3:30 PM']},
-    {name:'Jose Reyes',role:'IT Department',avail:true,slots:['10:00 AM','11:30 AM']},
-    {name:'Anna Cruz',role:'Finance Office',avail:true,slots:['9:00 AM','1:00 PM','2:30 PM']},
-    {name:'Ben Lim',role:'Academic Affairs',avail:true,slots:['10:30 AM','3:00 PM']},
-  ],
-};
+// Dynamic staff from registered employees
+function getStaffAvailForDay(dayName) {
+  const employees = allUsers.filter(u => u.role === 'employee');
+  const daySlots = {
+    Mon: ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'],
+    Tue: ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'],
+    Wed: ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'],
+    Thu: ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'],
+  };
+  return employees.map(e => ({
+    name: e.firstName + ' ' + e.lastName,
+    role: e.dept || 'Employee',
+    avail: true,
+    slots: daySlots[dayName] || [],
+  }));
+}
 
 let _pendingDateY, _pendingDateM, _pendingDateD;
 
@@ -1854,7 +1894,7 @@ function selectStudentDate(y, m, d) {
   document.getElementById('modal-date-title').textContent = dateStr + ' (' + dayName + ')';
   document.getElementById('modal-date-sub').textContent   = 'Staff availability for this day';
 
-  const staffData = STAFF_AVAIL[dayName] || [];
+ const staffData = getStaffAvailForDay(dayName);
   const available = staffData.filter(s => s.avail);
   const absent    = staffData.filter(s => !s.avail);
 
@@ -1902,7 +1942,7 @@ function closeModalAndSelect() {
   const dayName = DAYS_SH[dow];
   selectedDate  = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
   document.getElementById('selected-date-label').textContent = MONTHS_L[m]+' '+d+', '+y+' ('+dayName+')';
-  const staffData = STAFF_AVAIL[dayName] || [];
+ const staffData = getStaffAvailForDay(dayName);
   const grid = document.getElementById('staff-avail-grid');
   grid.innerHTML = staffData.map((s,i) => {
     const dot  = s.avail ? 'var(--green)' : 'var(--border2)';
@@ -1927,7 +1967,8 @@ function closeModalAndSelect() {
 function selectStaff(i, dayName) {
   document.querySelectorAll('.avail-slot').forEach(el=>el.classList.remove('selected'));
   document.getElementById('staff-slot-'+i)?.classList.add('selected');
-  const staff = (STAFF_AVAIL[dayName]||[])[i];
+const staffData = getStaffAvailForDay(dayName);
+const staff = staffData[i];
   if (!staff||!staff.avail) return;
   selectedStaffObj = staff;
 
