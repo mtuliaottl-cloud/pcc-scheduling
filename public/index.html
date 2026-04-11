@@ -1275,7 +1275,7 @@ async function submitBooking() {
 
   const apptId   = 'APT-' + Date.now();
   const fullName = (currentUser.firstName||'') + ' ' + (currentUser.lastName||'');
-  const staffName= selectedStaffObj.name;
+  const staffName = selectedStaffObj.name.trim();
 
   const row = [
     apptId,
@@ -1355,7 +1355,7 @@ function getStaffAvailForDay(dayName) {
   }
 
   return employees.map(e => ({
-    name:  (e.firstName || '') + ' ' + (e.lastName || ''),
+   name: ((e.firstName || '') + ' ' + (e.lastName || '')).trim(),
     role:  e.dept || 'Employee',
     avail: true, // all employees available Mon–Thu unless on leave
     slots: TIME_SLOTS,
