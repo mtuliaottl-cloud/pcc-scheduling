@@ -1592,10 +1592,7 @@ function toast(msg,type='green'){
   setTimeout(()=>el.remove(),3800);
 }
 
-// ═══════════════════════════════════════════════════════
-// INIT — FIX: restore session from full saved user object
-// No server roundtrip needed on load; we re-validate lazily via loadData
-// ═══════════════════════════════════════════════════════
+
 (async function init(){
   const saved = loadSession();
   if(saved && saved.id && saved.role && saved.email) {
