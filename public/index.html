@@ -529,6 +529,20 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
           <div style="font-size:11px;color:var(--text2);line-height:2.4">
             <div>Email: <span style="color:var(--text);font-weight:700" id="emp-email-display">—</span></div>
             <div>Role: <span style="color:var(--text);font-weight:700" id="emp-role-display">—</span></div>
+            <!-- EMPLOYEE DAY MODAL -->
+<div id="emp-day-modal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:520px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.18);animation:authIn .3s ease both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-family:var(--font-head);font-weight:900;font-size:16px" id="emp-modal-title"></div>
+        <div style="font-size:11px;color:var(--text2)" id="emp-modal-sub"></div>
+      </div>
+      <button onclick="closeEmpDayModal()" style="width:28px;height:28px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div id="emp-modal-appts"></div>
+  </div>
+</div>
+
           </div>
         </div>
       </div>
@@ -1407,7 +1421,12 @@ function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
     const isToday =d===todayD.getDate()&&month===todayD.getMonth()&&year===todayD.getFullYear();
     const fullBook=type==='student'&&work&&bookedDays.includes(d);
     const clickable=work&&!fullBook&&type==='student';
-    const onclick=clickable?`onclick="selectStudentDate(${year},${month},${d})"` :'';
+    const dateStrCheck=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+const onclick = type==='student'&&clickable
+  ? `onclick="selectStudentDate(${year},${month},${d})"`
+  : type==='emp'&&isWorkDay(year,month,d)&&markedAppts.some(a=>a['Date']===dateStrCheck)
+  ? `onclick="showEmpDayModal('${dateStrCheck}')"`
+  : '';
 
     let bg='',color='',border='',label='',cursor='default';
 
@@ -1417,15 +1436,16 @@ if(!work){
       bg='#fff3cd'; color='#856404'; border='2px solid #ffc107';
       label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">FULL</div>';
       cursor='not-allowed';
-    } else if(type==='emp'){
-      const dateStr=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-      const hasAppt=markedAppts.some(a=>a['Date']===dateStr);
-      if(hasAppt){
-        bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
-        label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">APPT</div>';
-      } else {
-        bg='var(--surface)'; color='var(--text)'; border='1.5px solid var(--border)';
-      }
+ } else if(type==='emp'){
+  const dateStr=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  const hasAppt=markedAppts.some(a=>a['Date']===dateStr);
+  if(hasAppt){
+    bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
+    label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">APPT</div>';
+    cursor='pointer';
+  } else {
+    bg='var(--surface)'; color='var(--text)'; border='1.5px solid var(--border)';
+  }
     } else {
       bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
       label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">OPEN</div>';
@@ -1572,7 +1592,98 @@ function selectSlot(btn,time){
   document.getElementById('booking-summary-empty').style.display ='none';
   document.getElementById('booking-summary-filled').style.display='block';
 }
+// ═══════════════════════════════════════════════════════
+// EMPLOYEE DAY MODAL
+// ═══════════════════════════════════════════════════════
+function showEmpDayModal(dateStr) {
+  const fullName = (currentUser.firstName||'') + ' ' + (currentUser.lastName||'');
+  const dayAppts = allAppts.filter(a =>
+    a['Date'] === dateStr &&
+    (a['Specific Person'] === fullName.trim() || a['Looking For'] === fullName.trim())
+  );
+  const d = new Date(dateStr + 'T00:00:00');
+  const label = d.toLocaleDateString('en-PH', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  document.getElementById('emp-modal-title').textContent = label;
+  document.getElementById('emp-modal-sub').textContent = dayAppts.length + ' appointment' + (dayAppts.length!==1?'s':'') + ' on this day';
+  const scMap = {Confirmed:'badge-green',Pending:'badge-amber',Cancelled:'badge-red',Completed:'badge-blue'};
+  document.getElementById('emp-modal-appts').innerHTML = dayAppts.map(a => `
+    <div style="border:1px solid var(--border);border-radius:var(--r2);padding:14px;margin-bottom:10px;background:var(--surface2)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div style="font-weight:800;font-family:var(--font-head);font-size:13px">${a['Full Name']}</div>
+          <div style="font-size:11px;color:var(--text2)">${a['Email']}</div>
+        </div>
+        <span class="badge ${scMap[a['Status']]||'badge-amber'}">${a['Status']}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;margin-bottom:10px">
+        <div style="background:var(--bg2);border-radius:8px;padding:8px">
+          <div style="color:var(--text3);margin-bottom:2px">Appointment ID</div>
+          <div style="font-weight:700">${a['Appointment ID']}</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:8px;padding:8px">
+          <div style="color:var(--text3);margin-bottom:2px">Time</div>
+          <div style="font-weight:700">${a['Time']}</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:8px;padding:8px">
+          <div style="color:var(--text3);margin-bottom:2px">Concern</div>
+          <div style="font-weight:700">${a['Concern']}</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:8px;padding:8px">
+          <div style="color:var(--text3);margin-bottom:2px">Meet type</div>
+          <div style="font-weight:700">${a['Meet Type']||'In-person'}</div>
+        </div>
+      </div>
+      ${a['Description'] ? `
+      <div style="background:var(--bg2);border-radius:8px;padding:8px;font-size:11px;margin-bottom:10px">
+        <div style="color:var(--text3);margin-bottom:2px">Description</div>
+        <div style="color:var(--text)">${a['Description']}</div>
+      </div>` : ''}
+      ${a['Status']==='Pending' ? `
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-act-green" style="flex:1;font-size:12px"
+          onclick="empUpdateStatus('${a['Appointment ID']}','Confirmed',this)">✓ Approve</button>
+        <button class="btn btn-act-red" style="flex:1;font-size:12px"
+          onclick="empUpdateStatus('${a['Appointment ID']}','Cancelled',this)">✕ Decline</button>
+      </div>` : ''}
+    </div>
+  `).join('') || '<div class="empty">No appointments found</div>';
+  document.getElementById('emp-day-modal').style.display = 'flex';
+}
 
+function closeEmpDayModal() {
+  document.getElementById('emp-day-modal').style.display = 'none';
+}
+
+async function empUpdateStatus(apptId, newStatus, btn) {
+  const appt = allAppts.find(a => a['Appointment ID'] === apptId);
+  if (!appt) return;
+  btn.disabled = true;
+  const row = [
+    appt['Appointment ID'], appt['Timestamp'], appt['Full Name'], appt['Email'],
+    appt['Student ID'], appt['Date'], appt['Time'], appt['Meet Type'],
+    appt['Concern'], appt['Description'], appt['Looking For'],
+    appt['Specific Person'], appt['Notes'], newStatus, appt['userId']
+  ];
+  try {
+    const res = await apiPost(API.appointments, {action:'update', row});
+    if (res.status === 'ok') {
+      appt['Status'] = newStatus;
+      toast(`Appointment ${newStatus.toLowerCase()}!`, newStatus==='Confirmed'?'green':'red');
+      await apiPost('/api/notify', {
+        to: appt['Email'], studentName: appt['Full Name'],
+        appointmentId: appt['Appointment ID'], date: appt['Date'],
+        time: appt['Time'], staff: appt['Specific Person'],
+        concern: appt['Concern'], status: newStatus,
+      });
+      closeEmpDayModal();
+      renderEmployeeView();
+    }
+  } catch(e) {
+    toast('Update failed. Please retry.', 'red');
+  } finally {
+    btn.disabled = false;
+  }
+}
 // ═══════════════════════════════════════════════════════
 // LIVE CLOCK
 // ═══════════════════════════════════════════════════════
