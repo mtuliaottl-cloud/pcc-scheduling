@@ -1,0 +1,9 @@
+{
+  "name": "pcc-scheduling",
+  "version": "1.0.0",
+  "description": "PCC Scheduling System",
+  "private": true,
+  "dependencies": {
+    "googleapis": "^144.0.0"
+  }
+}
