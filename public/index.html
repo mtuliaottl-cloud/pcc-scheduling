@@ -529,19 +529,7 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
           <div style="font-size:11px;color:var(--text2);line-height:2.4">
             <div>Email: <span style="color:var(--text);font-weight:700" id="emp-email-display">—</span></div>
             <div>Role: <span style="color:var(--text);font-weight:700" id="emp-role-display">—</span></div>
-            <!-- EMPLOYEE DAY MODAL -->
-<div id="emp-day-modal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);align-items:center;justify-content:center">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:520px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.18);animation:authIn .3s ease both">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div>
-        <div style="font-family:var(--font-head);font-weight:900;font-size:16px" id="emp-modal-title"></div>
-        <div style="font-size:11px;color:var(--text2)" id="emp-modal-sub"></div>
-      </div>
-      <button onclick="closeEmpDayModal()" style="width:28px;height:28px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
-    </div>
-    <div id="emp-modal-appts"></div>
-  </div>
-</div>
+         
 
           </div>
         </div>
@@ -626,6 +614,22 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
   </div>
 </div>
 
+<!-- EMPLOYEE DAY MODAL -->
+<div id="emp-day-modal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:520px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.18);animation:authIn .3s ease both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-family:var(--font-head);font-weight:900;font-size:16px" id="emp-modal-title"></div>
+        <div style="font-size:11px;color:var(--text2)" id="emp-modal-sub"></div>
+      </div>
+      <button onclick="closeEmpDayModal()" style="width:28px;height:28px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div id="emp-modal-appts"></div>
+  </div>
+</div>
+
+<!-- DATE POPUP MODAL -->
+ 
 <!-- DATE POPUP MODAL -->
 <div id="date-modal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);align-items:center;justify-content:center">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:480px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.18);animation:authIn .3s ease both">
