@@ -11,7 +11,7 @@ function getSheets() {
   const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
   const auth = new google.auth.GoogleAuth({
     credentials,
-    scopes: ['https://script.google.com/macros/s/AKfycbzuAlbaoexz67uXRmsg7th6q7htu5lZGd0PQHE3pdjHHXPi9JQCSw4fDbrDc779KgnZ5w/exec'],
+   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
   return google.sheets({ version: 'v4', auth });
 }
