@@ -9,7 +9,8 @@ const USERS_TAB = 'users';
 
 // Column order in the "users" sheet
 // id | role | firstName | lastName | email | password | sid | dept | createdAt
-const USER_HEADERS = ['id','role','firstName','lastName','email','password','sid','dept','createdAt'];
+const USER_HEADERS = ['id','role','firstName','lastName','email','password','sid','dept','createdAt','status'];
+
 
 function getSheets() {
   const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
@@ -122,6 +123,7 @@ export default async function handler(req, res) {
         sid  || '—',
         dept || '—',
         new Date().toISOString(),
+         'active',
       ];
 
       await sheets.spreadsheets.values.append({
