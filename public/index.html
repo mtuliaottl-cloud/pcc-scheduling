@@ -629,7 +629,7 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
 </div>
 
 <!-- DATE POPUP MODAL -->
- 
+
 <!-- DATE POPUP MODAL -->
 <div id="date-modal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);align-items:center;justify-content:center">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:480px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.18);animation:authIn .3s ease both">
@@ -1283,10 +1283,38 @@ function renderStudentAppts() {
             <div class="req-title">${a['Specific Person']} · ${a['Concern']}</div>
             <div class="req-sub">${a['Date']} · ${a['Time']}</div>
           </div>
-          <span class="badge ${sc[a['Status']]||'badge-amber'}">${a['Status']}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="badge ${sc[a['Status']]||'badge-amber'}">${a['Status']}</span>
+            ${a['Status']==='Pending'?`<button class="btn btn-sm btn-act-red" onclick="studentCancelAppt('${a['Appointment ID']}',this)">Cancel</button>`:''}
+          </div>
         </div>`
       ).join('')
     :'<div class="empty">No appointments yet</div>';
+}
+
+async function studentCancelAppt(apptId, btn) {
+  if(!confirm('Are you sure you want to cancel this appointment?')) return;
+  const appt=allAppts.find(a=>a['Appointment ID']===apptId);
+  if(!appt) return;
+  btn.disabled=true;
+  const row=[
+    appt['Appointment ID'],appt['Timestamp'],appt['Full Name'],appt['Email'],
+    appt['Student ID'],appt['Date'],appt['Time'],appt['Meet Type'],
+    appt['Concern'],appt['Description'],appt['Looking For'],
+    appt['Specific Person'],appt['Notes'],'Cancelled',appt['userId']
+  ];
+  try {
+    const res=await apiPost(API.appointments,{action:'update',row});
+    if(res.status==='ok'){
+      appt['Status']='Cancelled';
+      toast('Appointment cancelled.','amber');
+      renderStudentAppts();
+    }
+  } catch(e){
+    toast('Failed to cancel. Please retry.','red');
+  } finally {
+    btn.disabled=false;
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1384,12 +1412,18 @@ function getStaffAvailForDay(dayName) {
     }];
   }
 
-  return employees.map(e => ({
-   name: ((e.firstName || '') + ' ' + (e.lastName || '')).trim(),
-    role:  e.dept || 'Employee',
-    avail: true, // all employees available Mon–Thu unless on leave
-    slots: TIME_SLOTS,
-  }));
+return employees.map(e => {
+  const staffName = ((e.firstName||'')+ ' '+(e.lastName||'')).trim();
+  const takenSlots = allAppts
+    .filter(a=>a['Date']===selectedDate&&a['Specific Person']===staffName&&a['Status']!=='Cancelled')
+    .map(a=>a['Time']);
+  return {
+    name: staffName,
+    role: e.dept||'Employee',
+    avail: true,
+    slots: TIME_SLOTS.filter(t=>!takenSlots.includes(t)),
+  };
+});
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1415,7 +1449,13 @@ function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
 
   const firstDow=new Date(year,month,1).getDay();
   const daysInMonth=new Date(year,month+1,0).getDate();
-  const bookedDays=[14,22];
+ const bookedDays=[...new Set(allAppts
+  .filter(a=>a['Status']!=='Cancelled')
+  .map(a=>parseInt(a['Date'].slice(8)))
+)].filter(d=>{
+  const dateStr=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  return allAppts.filter(a=>a['Date']===dateStr&&a['Status']!=='Cancelled').length>=6;
+});
   let html='';
 
   for(let i=0;i<firstDow;i++) html+='<div class="cal-day cal-empty"></div>';
@@ -1423,8 +1463,9 @@ function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
   for(let d=1;d<=daysInMonth;d++){
     const work    =isWorkDay(year,month,d);
     const isToday =d===todayD.getDate()&&month===todayD.getMonth()&&year===todayD.getFullYear();
-    const fullBook=type==='student'&&work&&bookedDays.includes(d);
-    const clickable=work&&!fullBook&&type==='student';
+   const isPast=new Date(year,month,d)<new Date(todayD.getFullYear(),todayD.getMonth(),todayD.getDate());
+const fullBook=type==='student'&&work&&bookedDays.includes(d);
+const clickable=work&&!fullBook&&type==='student'&&!isPast;
     const dateStrCheck=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
 const onclick = type==='student'&&clickable
   ? `onclick="selectStudentDate(${year},${month},${d})"`
@@ -1434,7 +1475,7 @@ const onclick = type==='student'&&clickable
 
     let bg='',color='',border='',label='',cursor='default';
 
-if(!work){
+if(!work||isPast&&type==='student'){
       bg='#f0f0f5'; color='#bbb'; border='1px solid #e8e8f0';
     } else if(fullBook){
       bg='#fff3cd'; color='#856404'; border='2px solid #ffc107';
