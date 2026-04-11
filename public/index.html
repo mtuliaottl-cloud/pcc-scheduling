@@ -994,20 +994,30 @@ async function updateApptStatus(apptId, newStatus, btn) {
     appt['Concern'],appt['Description'],appt['Looking For'],
     appt['Specific Person'],appt['Notes'],newStatus,appt['userId']
   ];
-  try {
-    const res = await apiPost(API.appointments, {action:'update', row});
-    if (res.status==='ok') {
-      appt['Status'] = newStatus;
-      toast(`Appointment ${newStatus.toLowerCase()}!`, newStatus==='Confirmed'?'green':'red');
-      renderAdminView();
-    }
-  } catch (e) {
-    toast('Update failed. Please retry.', 'red');
-  } finally {
-    btn.disabled = false;
-  }
-}
+try {
+  const res = await apiPost(API.appointments, {action:'update', row});
+  if (res.status==='ok') {
+    appt['Status'] = newStatus;
+    toast(`Appointment ${newStatus.toLowerCase()}!`, newStatus==='Confirmed'?'green':'red');
+    
+    await apiPost('/api/notify', {
+      to:            appt['Email'],
+      studentName:   appt['Full Name'],
+      appointmentId: appt['Appointment ID'],
+      date:          appt['Date'],
+      time:          appt['Time'],
+      staff:         appt['Specific Person'],
+      concern:       appt['Concern'],
+      status:        newStatus,
+    });
 
+    renderAdminView();
+  }
+} catch (e) {
+  toast('Update failed. Please retry.', 'red');
+} finally {
+  btn.disabled = false;
+}
 let apptChart = null;
 
 function renderAdminChart() {
