@@ -1022,20 +1022,11 @@ textarea.field { resize: none; }
         <div class="card">
           <div class="sec-header">
             <div class="sec-title">Shift management</div>
-            <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue)">Request swap</button>
+            <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue)" onclick="releaseShift()">+ Release shift</button>
           </div>
           <div style="margin-bottom:12px">
             <div class="card-label" style="margin-bottom:8px">Open shifts available</div>
-            <div class="req-item">
-              <div class="req-icon" style="background:var(--blue-bg)">📋</div>
-              <div class="req-info"><div class="req-title">Thu Apr 17 · Admin Office</div><div class="req-sub">8AM–5PM</div></div>
-              <button class="btn btn-sm">Claim</button>
-            </div>
-            <div class="req-item">
-              <div class="req-icon" style="background:var(--blue-bg)">📋</div>
-              <div class="req-info"><div class="req-title">Wed Apr 16 · IT Department</div><div class="req-sub">1PM–5PM</div></div>
-              <button class="btn btn-sm">Claim</button>
-            </div>
+            <div id="open-shifts-list"></div>
           </div>
         </div>
       </div>
@@ -1090,7 +1081,7 @@ textarea.field { resize: none; }
               <textarea class="field" rows="2" style="font-size:12px" placeholder="Optional reason..."></textarea>
             </div>
             <div style="display:flex;gap:8px">
-              <button class="btn-primary" style="border-radius:var(--r);font-size:12px;padding:8px">Submit</button>
+              <button class="btn-primary" style="border-radius:var(--r);font-size:12px;padding:8px" onclick="submitLeaveRequest()">Submit</button>
               <button class="btn btn-sm" onclick="toggleLeaveForm()">Cancel</button>
             </div>
           </div>
@@ -1246,6 +1237,17 @@ let allAppts     = [];
 let allUsers     = [];
 let refreshTimer = null;
 let selectedDate = null, selectedStaffObj = null, selectedTime = null;
+
+// Leave requests: keyed by userId → array of {type, from, to, notes, status}
+let leaveRequests = {};
+
+// Open shifts pool (dynamic — employees can claim or release)
+let openShifts = [
+  { id: 'shift-1', date: 'Mon Apr 14', dept: 'Admin Office',   time: '8AM–5PM',  claimedBy: null },
+  { id: 'shift-2', date: 'Tue Apr 15', dept: 'IT Department',  time: '1PM–5PM',  claimedBy: null },
+  { id: 'shift-3', date: 'Wed Apr 16', dept: 'Finance Office', time: '8AM–12PM', claimedBy: null },
+  { id: 'shift-4', date: 'Thu Apr 17', dept: 'Academic Affairs', time: '9AM–5PM', claimedBy: null },
+];
 
 // ═══════════════════════════════════════════════════════
 // API HELPERS
@@ -1685,24 +1687,154 @@ function renderEmployeeView() {
       }).join('')
     : '<div class="empty">No appointments assigned to you yet</div>';
 
-  document.getElementById('request-list').innerHTML = [
-    {type:'PTO',dates:'Apr 22–24',status:'Pending'},
-    {type:'Sick leave',dates:'Mar 18',status:'Approved'},
-  ].map(r => {
-    const sc = {Pending:'badge-amber',Approved:'badge-green',Declined:'badge-red'}[r.status];
-    return `<div class="req-item">
-      <div class="req-icon" style="background:var(--green-bg)">🗓</div>
-      <div class="req-info"><div class="req-title">${r.type}</div><div class="req-sub">${r.dates}</div></div>
-      <span class="badge ${sc}">${r.status}</span>
-    </div>`;
-  }).join('');
-
+  renderLeaveRequests();
+  renderOpenShifts();
   renderCalendar('emp-calendar-grid','emp-calendar-head','emp-cal-title',empYear,empMonth,'emp',myAppts);
 }
 
 function toggleLeaveForm() {
   const f = document.getElementById('leave-form');
   f.style.display = f.style.display==='none' ? 'block' : 'none';
+}
+
+function submitLeaveRequest() {
+  if (!currentUser) return;
+  const type  = document.querySelector('#leave-form select').value;
+  const from  = document.querySelectorAll('#leave-form input[type="date"]')[0].value;
+  const to    = document.querySelectorAll('#leave-form input[type="date"]')[1].value;
+  const notes = document.querySelector('#leave-form textarea').value.trim();
+
+  if (!from || !to) return toast('Please select start and end dates.', 'amber');
+  if (from > to)    return toast('End date must be after start date.', 'amber');
+
+  const uid = currentUser.id;
+  if (!leaveRequests[uid]) leaveRequests[uid] = [];
+  leaveRequests[uid].push({ type, from, to, notes, status: 'Pending', submittedAt: new Date().toISOString() });
+
+  toast('Leave request submitted!', 'green');
+  toggleLeaveForm();
+  // Reset form fields
+  document.querySelector('#leave-form select').value = 'PTO — Paid time off';
+  document.querySelectorAll('#leave-form input[type="date"]').forEach(i => i.value = '');
+  document.querySelector('#leave-form textarea').value = '';
+  renderLeaveRequests();
+}
+
+function renderLeaveRequests() {
+  if (!currentUser) return;
+  const uid      = currentUser.id;
+  const requests = leaveRequests[uid] || [];
+  const el       = document.getElementById('request-list');
+  if (!el) return;
+
+  if (!requests.length) {
+    el.innerHTML = '<div class="empty">No requests submitted yet</div>';
+    return;
+  }
+
+  const scMap = { Pending:'badge-amber', Approved:'badge-green', Declined:'badge-red' };
+  el.innerHTML = requests.slice().reverse().map((r, ri) => {
+    const realIdx = requests.length - 1 - ri;
+    const dateRange = r.from === r.to ? r.from : r.from + ' → ' + r.to;
+    const sc = scMap[r.status] || 'badge-amber';
+    const canCancel = r.status === 'Pending';
+    return `<div class="req-item">
+      <div class="req-icon" style="background:var(--green-bg)">🗓</div>
+      <div class="req-info">
+        <div class="req-title">${r.type}</div>
+        <div class="req-sub">${dateRange}${r.notes ? ' · ' + r.notes : ''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <span class="badge ${sc}">${r.status}</span>
+        ${canCancel ? `<button class="btn btn-sm btn-act-red" style="font-size:10px;padding:3px 7px" onclick="cancelLeaveRequest(${realIdx})">Cancel</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function cancelLeaveRequest(idx) {
+  const uid = currentUser?.id;
+  if (!uid || !leaveRequests[uid]?.[idx]) return;
+  leaveRequests[uid].splice(idx, 1);
+  toast('Request cancelled.', 'amber');
+  renderLeaveRequests();
+}
+
+function renderOpenShifts() {
+  const el = document.getElementById('open-shifts-list');
+  if (!el) return;
+  const uid      = currentUser?.id;
+  const fullName = currentUser ? currentUser.firstName + ' ' + currentUser.lastName : '';
+  const available = openShifts.filter(s => !s.claimedBy);
+  const myClaimed = openShifts.filter(s => s.claimedBy === uid);
+
+  let html = '';
+
+  if (myClaimed.length) {
+    html += `<div class="card-label" style="margin-bottom:6px;color:var(--green-t)">My claimed shifts</div>`;
+    html += myClaimed.map(s => `
+      <div class="req-item">
+        <div class="req-icon" style="background:var(--green-bg)">✅</div>
+        <div class="req-info">
+          <div class="req-title">${s.date} · ${s.dept}</div>
+          <div class="req-sub">${s.time}</div>
+        </div>
+        <button class="btn btn-sm btn-act-red" onclick="unclaimShift('${s.id}')">Release</button>
+      </div>`).join('');
+    if (available.length) html += `<div class="divider"></div><div class="card-label" style="margin-bottom:6px">Other open shifts</div>`;
+  }
+
+  if (available.length) {
+    html += available.map(s => `
+      <div class="req-item">
+        <div class="req-icon" style="background:var(--blue-bg)">📋</div>
+        <div class="req-info">
+          <div class="req-title">${s.date} · ${s.dept}</div>
+          <div class="req-sub">${s.time}</div>
+        </div>
+        <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue)" onclick="claimShift('${s.id}')">Claim</button>
+      </div>`).join('');
+  } else if (!myClaimed.length) {
+    html = '<div class="empty">No open shifts available right now</div>';
+  }
+
+  el.innerHTML = html;
+}
+
+function claimShift(shiftId) {
+  if (!currentUser) return;
+  const shift = openShifts.find(s => s.id === shiftId);
+  if (!shift || shift.claimedBy) return;
+  shift.claimedBy = currentUser.id;
+  toast(`Shift claimed: ${shift.date} · ${shift.dept}`, 'green');
+  renderOpenShifts();
+}
+
+function unclaimShift(shiftId) {
+  const shift = openShifts.find(s => s.id === shiftId);
+  if (!shift) return;
+  shift.claimedBy = null;
+  toast('Shift released back to the pool.', 'amber');
+  renderOpenShifts();
+}
+
+function releaseShift() {
+  if (!currentUser) return;
+  // Prompt employee to add a new open shift they want to give away
+  const date = prompt('Enter the shift date (e.g. Mon Apr 21):');
+  if (!date) return;
+  const time = prompt('Enter the time range (e.g. 8AM–5PM):');
+  if (!time) return;
+  const newShift = {
+    id: 'shift-' + Date.now(),
+    date: date.trim(),
+    dept: currentUser.dept || 'General',
+    time: time.trim(),
+    claimedBy: null,
+  };
+  openShifts.push(newShift);
+  toast('Shift posted to the open pool!', 'blue');
+  renderOpenShifts();
 }
 
 // ═══════════════════════════════════════════════════════
