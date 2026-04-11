@@ -1399,7 +1399,7 @@ function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
 
     let bg='',color='',border='',label='',cursor='default';
 
-    if(!work){
+if(!work){
       bg='#f0f0f5'; color='#bbb'; border='1px solid #e8e8f0';
     } else if(fullBook){
       bg='#fff3cd'; color='#856404'; border='2px solid #ffc107';
@@ -1412,8 +1412,7 @@ function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
         bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
         label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">APPT</div>';
       } else {
-        // Workdays still get a subtle blue tint so they look different from weekends
-        bg='#eef2ff'; color='#3b6ff5'; border='1px solid #c7d4fb';
+        bg='var(--surface)'; color='var(--text)'; border='1.5px solid var(--border)';
       }
     } else {
       bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
