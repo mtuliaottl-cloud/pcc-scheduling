@@ -1596,12 +1596,10 @@ function toast(msg,type='green'){
 (async function init(){
   const saved = loadSession();
   if(saved && saved.id && saved.role && saved.email) {
-    // Restore session immediately from storage (fast)
     currentUser = saved;
-    launchApp();
+    launchApp(); // this already calls loadData() which fetches appointments
     return;
   }
-  // No valid session — show auth screen (already visible by default)
 })();
 
 // Initial calendar renders (shown before login completes)
