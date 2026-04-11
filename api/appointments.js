@@ -28,7 +28,20 @@ function cors(res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
+
 async function ensureHeader(sheets) {
+  // First ensure the tab exists
+  const meta = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
+  const tabExists = meta.data.sheets.some(s => s.properties.title === APPT_TAB);
+  
+  if (!tabExists) {
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: SHEET_ID,
+      requestBody: { requests: [{ addSheet: { properties: { title: APPT_TAB } } }] },
+    });
+  }
+
+  // Then ensure header row
   const r = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
     range: `${APPT_TAB}!A1:O1`,
@@ -42,6 +55,7 @@ async function ensureHeader(sheets) {
     });
   }
 }
+
 
 async function getAllRows(sheets) {
   const r = await sheets.spreadsheets.values.get({
