@@ -528,20 +528,17 @@ textarea.field { resize: none; }
 }
 
 .cal-day {
-  aspect-ratio:1; border-radius:7px;
+  aspect-ratio:1; border-radius:10px;
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
-  font-size:12px; font-weight:500;
-  position:relative; transition:all .12s;
-  gap:2px;
+  font-size:14px; font-weight:800;
+  position:relative; transition:all .15s;
+  gap:1px;
 }
 
-.cal-day.cal-off   { color:var(--text3); }
-.cal-day:not(.cal-off):not(.cal-empty) { cursor:pointer; }
-.cal-day:not(.cal-off):not(.cal-empty):hover { background:var(--bg2); }
-.cal-today    { background:var(--blue-bg)!important; color:var(--blue)!important; font-weight:800!important; }
-.cal-selected { background:var(--blue)!important; color:#fff!important; }
-.cal-dot { width:5px; height:5px; border-radius:50%; }
+.cal-day:hover { filter: brightness(0.92); }
+.cal-today    { background:var(--blue-bg)!important; color:var(--blue)!important; font-weight:900!important; }
+.cal-selected { background:var(--blue)!important; color:#fff!important; border-color:var(--blue)!important; }
 
 /* ═══════════════════════════════════════
    STAFF AVAILABILITY
@@ -1765,30 +1762,44 @@ function renderCalendar(gridId, headId, titleId, year, month, type, markedAppts=
 
   const firstDow    = new Date(year,month,1).getDay();
   const daysInMonth = new Date(year,month+1,0).getDate();
-  const bookedDays  = [14,17,22];
+  const bookedDays  = [14,22];
   let html = '';
 
   for (let i=0;i<firstDow;i++) html+='<div class="cal-day cal-empty"></div>';
   for (let d=1;d<=daysInMonth;d++) {
-    const work      = isWorkDay(year,month,d);
-    const isToday   = d===todayD.getDate()&&month===todayD.getMonth()&&year===todayD.getFullYear();
-    const dateStr   = year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const hasAppt   = markedAppts.some(a=>a['Date']===dateStr);
-    const fullBook  = type==='student'&&work&&bookedDays.includes(d);
-    let cls='cal-day', dot='';
+    const work     = isWorkDay(year,month,d);
+    const isToday  = d===todayD.getDate()&&month===todayD.getMonth()&&year===todayD.getFullYear();
+    const dateStr  = year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const fullBook = type==='student'&&work&&bookedDays.includes(d);
+    const clickable= work&&!fullBook&&type==='student';
+    const onclick  = clickable ? `onclick="selectStudentDate(${year},${month},${d})"` : '';
+
+    let bg='', color='', border='', label='', cursor='default', extraStyle='';
 
     if (!work) {
-      cls+=' cal-off';
+      // Weekend — greyed out
+      bg='#f0f0f5'; color='#bbb'; border='1px solid #e8e8f0';
     } else if (fullBook) {
-      dot=`<div class="cal-dot" style="background:var(--amber)"></div>`;
-    } else if (hasAppt || (type==='student'&&work)) {
-      dot=`<div class="cal-dot" style="background:${hasAppt?'var(--green)':'var(--green)'}"></div>`;
+      // Fully booked — amber
+      bg='#fff3cd'; color='#856404'; border='2px solid #ffc107';
+      label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">FULL</div>';
+      cursor='not-allowed';
+    } else {
+      // Available — green
+      bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
+      label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">OPEN</div>';
+      cursor='pointer';
+      extraStyle='transform:scale(1);transition:transform .15s;';
     }
 
-    if (isToday&&work) cls+=' cal-today';
-    const clickable = work&&!fullBook&&type==='student';
-    const onclick   = clickable ? `onclick="selectStudentDate(${year},${month},${d})"` : '';
-    html+=`<div class="${cls}" ${onclick}><span>${d}</span>${dot}</div>`;
+    if (isToday&&work) {
+      bg='#dbeafe'; color='#1d4ed8'; border='2px solid #3b6ff5';
+      label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">TODAY</div>';
+    }
+
+    html+=`<div class="cal-day" style="background:${bg};color:${color};border:${border};border-radius:10px;cursor:${cursor};${extraStyle}font-weight:800;font-size:14px;" ${onclick}>
+      <span>${d}</span>${label}
+    </div>`;
   }
   document.getElementById(gridId).innerHTML = html;
 }
