@@ -1320,10 +1320,13 @@ async function submitBooking() {
       document.getElementById('concern-type').value='';
       document.getElementById('concern-desc').value='';
     } else {
-      toast('Booking failed. Please try again.','red');
+      // Show the actual server error message so we know what's wrong
+      toast('Booking failed: ' + (res.message || 'Unknown error — check Vercel logs'), 'red');
+      console.error('Booking API error:', res);
     }
   } catch(e) {
-    toast('Could not connect. Check your internet connection.','red');
+    toast('Network error: ' + e.message, 'red');
+    console.error('Booking fetch error:', e);
   } finally {
     btn.disabled = false;
     btn.textContent = '✦ Confirm booking';
@@ -1409,7 +1412,8 @@ function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
         bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
         label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">APPT</div>';
       } else {
-        bg='#f5f5fa'; color='#666'; border='1px solid #ddd';
+        // Workdays still get a subtle blue tint so they look different from weekends
+        bg='#eef2ff'; color='#3b6ff5'; border='1px solid #c7d4fb';
       }
     } else {
       bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
