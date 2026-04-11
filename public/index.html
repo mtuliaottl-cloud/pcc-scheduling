@@ -1018,6 +1018,8 @@ try {
 } finally {
   btn.disabled = false;
 }
+}  // ← THIS CLOSING BRACE IS MISSING — closes updateApptStatus
+
 let apptChart = null;
 
 function renderAdminChart() {
