@@ -563,9 +563,27 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
             <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:4px"></span>Fully booked</span>
           </div>
         </div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="sec-header">
-            <div class="sec-title">Staff availability</div>
+       <div class="card" style="margin-bottom:16px">
+  <div class="sec-header">
+    <div class="sec-title">Nature of concern</div>
+  </div>
+  <select class="field" id="concern-type-early" style="font-size:13px" onchange="onConcernChange()">
+    <option value="">— Select concern first —</option>
+    <option>General inquiry</option>
+    <option>Documentation</option>
+    <option>Financial</option>
+    <option>Academic</option>
+    <option>Technical support</option>
+    <option>Legal</option>
+    <option>Medical</option>
+    <option>Other</option>
+  </select>
+  <div style="margin-top:8px;font-size:11px;color:var(--text2)" id="concern-dept-label"></div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div class="sec-header">
+    <div class="sec-title">Staff availability</div>
             <span style="font-size:11px;color:var(--text2)" id="selected-date-label">Select a date above</span>
           </div>
           <div class="avail-grid" id="staff-avail-grid">
@@ -665,6 +683,18 @@ const API = {
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
+
+const CONCERN_DEPT = {
+  'General inquiry':   'Admin Office',
+  'Documentation':     'Admin Office',
+  'Financial':         'Finance Office',
+  'Academic':          'Academic Affairs',
+  'Technical support': 'IT Department',
+  'Legal':             'Admin Office',
+  'Medical':           'Admin Office',
+  'Other':             'Admin Office',
+};
+
 let currentUser  = null;
 let allAppts     = [];
 let allUsers     = [];
@@ -769,6 +799,46 @@ async function doLogin() {
     btn.textContent = 'Sign in →';
   }
 }
+
+
+function onConcernChange() {
+  const concern = document.getElementById('concern-type-early').value;
+  const dept = CONCERN_DEPT[concern] || '';
+  const label = document.getElementById('concern-dept-label');
+  if(label) label.textContent = dept ? '→ Routing to: ' + dept : '';
+
+  // Sync to the hidden concern-type in booking summary
+  const ct = document.getElementById('concern-type');
+  if(ct) ct.value = concern;
+
+  // Refresh staff grid if date already selected
+  if(selectedDate) {
+    const dow = new Date(selectedDate+'T00:00:00').getDay();
+    const dayName = DAYS_SH[dow];
+    const staffData = getStaffAvailForDay(dayName, concern);
+    const grid = document.getElementById('staff-avail-grid');
+    if(grid && staffData.length) {
+      grid.innerHTML = staffData.map((s,i) => {
+        const dot = s.avail?'var(--green)':'var(--border2)';
+        const hint = s.avail&&s.slots.length>0
+          ? s.slots.length+' slot'+(s.slots.length!==1?'s':'')+' available'
+          : s.avail&&s.slots.length===0?'Fully booked':'On leave / unavailable';
+        const hc = !s.avail?'var(--text3)':s.slots.length===0?'var(--red-t)':'var(--green-t)';
+        const cls = 'avail-slot'+(!s.avail||s.slots.length===0?' unavail':'');
+        const click = s.avail&&s.slots.length>0?`onclick="selectStaff(${i},'${dayName}')"` :'';
+        return `<div class="${cls}" id="staff-slot-${i}" ${click}>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+            <div class="avail-dot" style="background:${dot}"></div>
+            <div class="avail-name">${s.name}</div>
+          </div>
+          <div class="avail-role">${s.role}</div>
+          <div style="font-size:11px;color:${hc};margin-top:4px;font-weight:700">${hint}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
 
 // ═══════════════════════════════════════════════════════
 // REGISTER — FIX: pass dept field correctly
@@ -924,10 +994,22 @@ const COLORS = {
 const ROLE_COLOR = {admin:'red',employee:'blue',student:'green'};
 
 function renderAdminView() {
-  const employees = allUsers.filter(u=>u.role==='employee');
+  const adminDept = currentUser.dept || '';
+  const isFullAdmin = !adminDept || adminDept === '—' || adminDept === 'Admin Office';
+
+  // Filter appointments by department if admin has a specific dept
+  const visibleAppts = isFullAdmin ? allAppts : allAppts.filter(a => {
+    const apptDept = CONCERN_DEPT[a['Concern']] || '';
+    return apptDept === adminDept || a['Specific Person'] === (currentUser.firstName+' '+currentUser.lastName).trim();
+  });
+
+  const employees = isFullAdmin
+    ? allUsers.filter(u=>u.role==='employee')
+    : allUsers.filter(u=>u.role==='employee' && u.dept===adminDept);
+
   const todayStr  = new Date().toISOString().slice(0,10);
-  const pending   = allAppts.filter(a=>a['Status']==='Pending');
-  const todayApts = allAppts.filter(a=>a['Date']===todayStr);
+  const pending   = visibleAppts.filter(a=>a['Status']==='Pending');
+  const todayApts = visibleAppts.filter(a=>a['Date']===todayStr);
 
   document.getElementById('kpi-emp').textContent     = employees.length;
   document.getElementById('kpi-appt').textContent    = allAppts.length;
@@ -937,8 +1019,8 @@ function renderAdminView() {
   document.getElementById('admin-user-badge').textContent = allUsers.length + ' users';
 
   const apptBody = document.getElementById('admin-appt-body');
-  apptBody.innerHTML = allAppts.length
-    ? allAppts.slice().reverse().map(a => {
+  apptBody.innerHTML = visibleAppts.length
+    ? visibleAppts.slice().reverse().map(a => {
         const sc = {Confirmed:'badge-green',Pending:'badge-amber',Cancelled:'badge-red',Completed:'badge-blue'}[a['Status']]||'badge-amber';
         return `<tr>
           <td style="font-weight:700;font-family:var(--font-head)">${a['Full Name']||'—'}</td>
@@ -1416,14 +1498,21 @@ async function submitBooking() {
 // FIX: pulls from allUsers (loaded from Google Sheets)
 //      Falls back to showing current user if no employees exist yet
 // ═══════════════════════════════════════════════════════
+
+
 const TIME_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'];
 
-function getStaffAvailForDay(dayName) {
-  // Get all employees from the loaded users
+function getStaffAvailForDay(dayName, concernType) {
   let employees = allUsers.filter(u => u.role === 'employee');
 
-  // If no employees loaded yet (e.g. just registered), show a fallback
-  if (!employees.length) {
+  // Filter by department if concern is selected
+  if(concernType && CONCERN_DEPT[concernType]) {
+    const targetDept = CONCERN_DEPT[concernType];
+    const deptFiltered = employees.filter(e => e.dept === targetDept);
+    if(deptFiltered.length) employees = deptFiltered;
+  }
+
+  if(!employees.length) {
     return [{
       name: 'General Staff',
       role: 'Available',
@@ -1432,18 +1521,18 @@ function getStaffAvailForDay(dayName) {
     }];
   }
 
-return employees.map(e => {
-  const staffName = ((e.firstName||'')+ ' '+(e.lastName||'')).trim();
-  const takenSlots = allAppts
-    .filter(a=>a['Date']===selectedDate&&a['Specific Person']===staffName&&a['Status']!=='Cancelled')
-    .map(a=>a['Time']);
-  return {
-    name: staffName,
-    role: e.dept||'Employee',
-    avail: true,
-    slots: TIME_SLOTS.filter(t=>!takenSlots.includes(t)),
-  };
-});
+  return employees.map(e => {
+    const staffName = ((e.firstName||'')+ ' '+(e.lastName||'')).trim();
+    const takenSlots = allAppts
+      .filter(a=>a['Date']===selectedDate&&a['Specific Person']===staffName&&a['Status']!=='Cancelled')
+      .map(a=>a['Time']);
+    return {
+      name: staffName,
+      role: e.dept||'Employee',
+      avail: true,
+      slots: TIME_SLOTS.filter(t=>!takenSlots.includes(t)),
+    };
+  });
 }
 
 
@@ -1555,7 +1644,8 @@ function selectStudentDate(y,m,d){
   document.getElementById('modal-date-title').textContent=dateStr+' ('+dayName+')';
   document.getElementById('modal-date-sub').textContent='Staff availability for this day';
 
-  const staffData=getStaffAvailForDay(dayName);
+const concern = document.getElementById('concern-type-early')?.value || '';
+const staffData=getStaffAvailForDay(dayName, concern);
   const available=staffData.filter(s=>s.avail);
   const absent   =staffData.filter(s=>!s.avail);
 
@@ -1616,7 +1706,8 @@ function closeModalAndSelect(){
   selectedDate=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
   document.getElementById('selected-date-label').textContent=MONTHS_L[m]+' '+d+', '+y+' ('+dayName+')';
 
-  const staffData=getStaffAvailForDay(dayName);
+  const concern = document.getElementById('concern-type-early')?.value || document.getElementById('concern-type')?.value || '';
+const staffData=getStaffAvailForDay(dayName, concern);
   const grid=document.getElementById('staff-avail-grid');
   grid.innerHTML=staffData.map((s,i)=>{
     const dot =s.avail?'var(--green)':'var(--border2)';
@@ -1644,7 +1735,8 @@ const click=s.avail&&!isFullyBooked?`onclick="selectStaff(${i},'${dayName}')"` :
 function selectStaff(i,dayName){
   document.querySelectorAll('.avail-slot').forEach(el=>el.classList.remove('selected'));
   document.getElementById('staff-slot-'+i)?.classList.add('selected');
-  const staffData=getStaffAvailForDay(dayName);
+  const concern = document.getElementById('concern-type-early')?.value || document.getElementById('concern-type')?.value || '';
+const staffData=getStaffAvailForDay(dayName, concern);
   const staff=staffData[i];
   if(!staff||!staff.avail) return;
   selectedStaffObj=staff;
