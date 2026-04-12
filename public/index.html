@@ -817,8 +817,8 @@ function onConcernChange() {
     const dayName = DAYS_SH[dow];
     const staffData = getStaffAvailForDay(dayName, concern);
     const grid = document.getElementById('staff-avail-grid');
-    if(grid && staffData.length) {
-      grid.innerHTML = staffData.map((s,i) => {
+    if(grid) {
+      grid.innerHTML = staffData.length ? staffData.map((s,i) => {
         const dot = s.avail?'var(--green)':'var(--border2)';
         const hint = s.avail&&s.slots.length>0
           ? s.slots.length+' slot'+(s.slots.length!==1?'s':'')+' available'
@@ -834,7 +834,7 @@ function onConcernChange() {
           <div class="avail-role">${s.role}</div>
           <div style="font-size:11px;color:${hc};margin-top:4px;font-weight:700">${hint}</div>
         </div>`;
-      }).join('');
+     }).join('') : '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">No staff available for this concern. Select a different concern or contact the office directly.</div>';
     }
   }
 }
@@ -1506,20 +1506,12 @@ function getStaffAvailForDay(dayName, concernType) {
   let employees = allUsers.filter(u => u.role === 'employee');
 
   // Filter by department if concern is selected
-  if(concernType && CONCERN_DEPT[concernType]) {
+if(concernType && CONCERN_DEPT[concernType]) {
     const targetDept = CONCERN_DEPT[concernType];
-    const deptFiltered = employees.filter(e => e.dept === targetDept);
-    if(deptFiltered.length) employees = deptFiltered;
+    employees = employees.filter(e => e.dept === targetDept);
   }
 
-  if(!employees.length) {
-    return [{
-      name: 'General Staff',
-      role: 'Available',
-      avail: true,
-      slots: TIME_SLOTS,
-    }];
-  }
+ if(!employees.length) {
 
   return employees.map(e => {
     const staffName = ((e.firstName||'')+ ' '+(e.lastName||'')).trim();
@@ -1724,7 +1716,7 @@ const click=s.avail&&!isFullyBooked?`onclick="selectStaff(${i},'${dayName}')"` :
       <div class="avail-role">${s.role}</div>
       <div style="font-size:11px;color:${hc};margin-top:4px;font-weight:700">${hint}</div>
     </div>`;
-  }).join('');
+   }).join('') : '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">No staff available for this concern type. Please select a different concern.</div>';
 
   document.getElementById('time-slot-card').style.display='none';
   document.getElementById('booking-summary-empty').style.display ='block';
