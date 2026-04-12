@@ -1261,6 +1261,15 @@ function releaseShift(){
   renderOpenShifts();
 }
 
+function convertTo24Hr(timeStr) {
+  if(!timeStr) return '00:00:00';
+  const [time, modifier] = timeStr.trim().split(' ');
+  let [hours, minutes] = time.split(':');
+  hours = parseInt(hours);
+  if(modifier === 'PM' && hours !== 12) hours += 12;
+  if(modifier === 'AM' && hours === 12) hours = 0;
+  return String(hours).padStart(2,'0') + ':' + (minutes||'00') + ':00';
+}
 // ═══════════════════════════════════════════════════════
 // STUDENT RENDER
 // ═══════════════════════════════════════════════════════
@@ -1271,7 +1280,18 @@ function renderStudentView() {
 
 function renderStudentAppts() {
   if(!currentUser||currentUser.role!=='student') return;
-  const myAppts=allAppts.filter(a=>a['userId']===currentUser.id||a['Email']===currentUser.email);
+  const now = new Date();
+const myAppts = allAppts.filter(a => {
+  if(a['userId'] !== currentUser.id && a['Email'] !== currentUser.email) return false;
+  if(a['Status'] === 'Cancelled') return false;
+  if(a['Status'] === 'Confirmed' || a['Status'] === 'Completed') {
+    // Hide confirmed/completed appointments after 5 hours past their scheduled time
+    const apptDateTime = new Date(a['Date'] + 'T' + convertTo24Hr(a['Time']));
+    const hoursElapsed = (now - apptDateTime) / (1000 * 60 * 60);
+    if(hoursElapsed > 5) return false;
+  }
+  return true;
+});
   const sc={Confirmed:'badge-green',Completed:'badge-blue',Pending:'badge-amber',Cancelled:'badge-red'};
   const el=document.getElementById('student-appts');
   if(!el) return;
@@ -1426,6 +1446,7 @@ return employees.map(e => {
 });
 }
 
+
 // ═══════════════════════════════════════════════════════
 // CALENDAR ENGINE
 // ═══════════════════════════════════════════════════════
@@ -1551,6 +1572,17 @@ function selectStudentDate(y,m,d){
         </div>`;
       }).join('')
     :'<div style="font-size:12px;color:var(--text3);padding:8px">No staff available this day</div>';
+
+// Disable book button if all staff fully booked
+const allFull = available.every(s => s.slots.length === 0);
+const bookBtn = document.getElementById('modal-book-btn');
+if(bookBtn) {
+  bookBtn.disabled = allFull;
+  bookBtn.textContent = allFull ? '⛔ All slots fully booked on this day' : 'Book on this date →';
+  bookBtn.style.background = allFull ? 'var(--text3)' : '';
+  bookBtn.style.boxShadow = allFull ? 'none' : '';
+  bookBtn.style.cursor = allFull ? 'not-allowed' : '';
+}
 
   document.getElementById('modal-absent').innerHTML=absent.length
     ?absent.map(s=>`
