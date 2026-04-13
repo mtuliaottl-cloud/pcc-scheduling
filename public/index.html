@@ -1911,7 +1911,21 @@ function nextStudentMonth(){if(++stuMonth>11){stuMonth=0;stuYear++;}renderStuden
 // ═══════════════════════════════════════════════════════
 let _pendingDateY, _pendingDateM, _pendingDateD;
 
-document.getElementById('modal-available').innerHTML = `
+function selectStudentDate(y,m,d){
+  _pendingDateY=y; _pendingDateM=m; _pendingDateD=d;
+  const dow=new Date(y,m,d).getDay();
+  const dayName=DAYS_SH[dow];
+  const dateStr=MONTHS_L[m]+' '+d+', '+y;
+
+  document.getElementById('modal-date-title').textContent=dateStr+' ('+dayName+')';
+  document.getElementById('modal-date-sub').textContent='Staff availability for this day';
+
+  const concern = document.getElementById('concern-type-early')?.value || '';
+  const staffData=getStaffAvailForDay(dayName, concern);
+  const available=staffData.filter(s=>s.avail);
+  const absent=staffData.filter(s=>!s.avail);
+
+  document.getElementById('modal-available').innerHTML = `
   <div style="text-align:center;padding:20px 0">
     <div style="font-size:40px;margin-bottom:10px">📅</div>
     <div style="font-family:var(--font-head);font-weight:900;font-size:16px;color:var(--text);margin-bottom:6px">
