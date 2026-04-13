@@ -696,18 +696,11 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
             <div id="summary-content" style="margin-bottom:12px"></div>
             <div class="divider"></div>
             <div style="margin-bottom:10px">
-              <div class="card-label" style="margin-bottom:5px">Nature of concern</div>
-              <select class="field" id="concern-type" style="font-size:12px">
-                <option value="">— Select —</option>
-                <option>General inquiry</option>
-                <option>Documentation</option>
-                <option>Financial</option>
-                <option>Academic</option>
-                <option>Technical support</option>
-                <option>Legal</option>
-                <option>Medical</option>
-                <option>Other</option>
-              </select>
+              <div class="card-label" style="margin-bottom:5px">Nature of Problem</div>
+             <select class="field" id="concern-type" style="font-size:12px" 
+        onchange="onSubConcernChange()">
+  <option value="">— Select specific concern —</option>
+</select>
             </div>
             <div style="margin-bottom:12px">
               <div class="card-label" style="margin-bottom:5px">Brief description</div>
@@ -945,6 +938,33 @@ async function apiGet(url) {
   return r.json();
 }
 
+const SUB_CONCERNS = {
+  'General inquiry':   ['Walk-in inquiry','Appointment request','General question','Office hours inquiry','Other general'],
+  'Documentation':     ['Certificate of enrollment','Good moral certificate','Transcript of records','Diploma request','ID replacement','Other documents'],
+  'Financial':         ['Tuition fee inquiry','Scholarship application','Payment plan request','Refund request','Financial aid','Other financial'],
+  'Academic':          ['Grade inquiry','Enrollment concern','Subject scheduling','Dropping/adding subject','Academic probation','Other academic'],
+  'Technical support': ['Cannot log in to portal','Email/account issue','Internet connection problem','Computer/equipment issue','System error','Other technical'],
+  'Legal':             ['Student rights concern','Disciplinary matter','Appeals process','Policy clarification','Other legal'],
+  'Medical':           ['Medical certificate request','Health concern','First aid assistance','Medical records','Other medical'],
+  'Other':             ['Not listed above','Follow-up concern','Feedback/suggestion','Other'],
+};
+
+function populateSubConcerns(mainConcern) {
+  const select = document.getElementById('concern-type');
+  if (!select) return;
+  const subs = SUB_CONCERNS[mainConcern] || [];
+  select.innerHTML = subs.length
+    ? `<option value="">— Select specific concern —</option>` +
+      subs.map(s => `<option value="${s}">${s}</option>`).join('')
+    : `<option value="">— Select concern type first —</option>`;
+}
+
+function onSubConcernChange() {
+  // Sync value upward if needed
+  const val = document.getElementById('concern-type').value;
+  console.log('Sub-concern selected:', val);
+}
+
 // ═══════════════════════════════════════════════════════
 // SESSION PERSISTENCE
 // FIX: Store the full user object, not just id/role/email
@@ -1057,8 +1077,7 @@ function onConcernChange() {
   if (label) label.textContent = dept ? '→ Routing to: ' + dept : '';
 
   // Sync to booking summary concern dropdown
-  const ct = document.getElementById('concern-type');
-  if (ct) ct.value = concern;
+  populateSubConcerns(concern);
 
   const grid = document.getElementById('staff-avail-grid');
   if (!grid) return;
