@@ -297,9 +297,33 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
 <div class="nav-tabs" id="nav-tabs"></div>
     <div class="nav-end">
       <div style="position:relative">
-        <div class="btn-icon" style="cursor:default">🔔</div>
-        <div class="notif-dot" id="notif-dot" style="display:none"></div>
+  <div class="btn-icon" onclick="toggleNotifPanel()" 
+       style="cursor:pointer" id="notif-bell">🔔</div>
+  <div class="notif-dot" id="notif-dot" style="display:none"></div>
+  
+  <!-- NOTIFICATION PANEL -->
+  <div id="notif-panel" style="display:none;position:absolute;top:38px;right:0;
+       width:320px;background:var(--surface);border:1px solid var(--border);
+       border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:9999;
+       overflow:hidden;animation:authIn .2s ease both">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--border);
+                display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:var(--font-head);font-weight:800;font-size:13px">
+        Notifications
       </div>
+      <button onclick="clearAllNotifs()" 
+              style="font-size:10px;color:var(--text3);background:none;border:none;
+                     cursor:pointer;font-family:var(--font-head);font-weight:700">
+        Clear all
+      </button>
+    </div>
+    <div id="notif-list" style="max-height:320px;overflow-y:auto"></div>
+    <div id="notif-empty" style="padding:24px;text-align:center;
+                                  color:var(--text3);font-size:12px">
+      🔕 No new notifications
+    </div>
+  </div>
+</div>
       <div class="nav-avatar" id="top-avatar">?</div>
       <span class="nav-name" id="top-name"></span>
       <button class="btn-logout" onclick="doLogout()">Sign out</button>
@@ -748,6 +772,134 @@ const API = {
   appointments: '/api/appointments',
   users:        '/api/users',
 };
+// ═══════════════════════════════════════════════════════
+// NOTIFICATION SYSTEM
+// ═══════════════════════════════════════════════════════
+let notifications = [];
+
+function addNotif(message, type = 'info', apptId = null) {
+  const icons = { info:'ℹ️', success:'✅', warning:'⚠️', error:'❌', booking:'📅' };
+  notifications.unshift({
+    id: Date.now(),
+    message,
+    type,
+    icon: icons[type] || 'ℹ️',
+    time: new Date(),
+    read: false,
+    apptId,
+  });
+  // Keep max 20
+  if (notifications.length > 20) notifications = notifications.splice(0, 20);
+  renderNotifPanel();
+  updateNotifBadge();
+}
+
+function updateNotifBadge() {
+  const unread = notifications.filter(n => !n.read).length;
+  const dot = document.getElementById('notif-dot');
+  if (dot) {
+    dot.style.display = unread ? '' : 'none';
+    dot.textContent = unread > 9 ? '9+' : (unread || '');
+    dot.style.cssText += `;width:auto;min-width:14px;padding:0 3px;
+      border-radius:7px;font-size:8px;font-weight:800;font-family:var(--font-head);
+      color:#fff;display:${unread ? 'flex' : 'none'};
+      align-items:center;justify-content:center;
+      background:var(--red);top:-4px;right:-4px;`;
+  }
+}
+
+function renderNotifPanel() {
+  const list  = document.getElementById('notif-list');
+  const empty = document.getElementById('notif-empty');
+  if (!list) return;
+
+  if (!notifications.length) {
+    list.innerHTML  = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+  const colorMap = {
+    info:    { bg:'var(--blue-bg)',   t:'var(--blue-t)'   },
+    success: { bg:'var(--green-bg)',  t:'var(--green-t)'  },
+    warning: { bg:'var(--amber-bg)',  t:'var(--amber-t)'  },
+    error:   { bg:'var(--red-bg)',    t:'var(--red-t)'    },
+    booking: { bg:'var(--purple-bg)', t:'var(--purple-t)' },
+  };
+
+  list.innerHTML = notifications.map(n => {
+    const c   = colorMap[n.type] || colorMap.info;
+    const ago = getTimeAgo(n.time);
+    return `
+      <div onclick="markNotifRead(${n.id})" 
+           style="padding:11px 14px;border-bottom:1px solid var(--border);
+                  cursor:pointer;background:${n.read ? 'transparent' : 'var(--bg2)'};
+                  transition:background .15s;display:flex;gap:10px;align-items:flex-start"
+           onmouseover="this.style.background='var(--bg2)'"
+           onmouseout="this.style.background='${n.read ? 'transparent' : 'var(--bg2)'}'">
+        <div style="width:30px;height:30px;border-radius:8px;flex-shrink:0;
+                    background:${c.bg};color:${c.t};display:flex;
+                    align-items:center;justify-content:center;font-size:14px">
+          ${n.icon}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:${n.read ? '500' : '700'};
+                      font-family:var(--font-head);line-height:1.4">
+            ${n.message}
+          </div>
+          <div style="font-size:10px;color:var(--text3);margin-top:3px">${ago}</div>
+        </div>
+        ${!n.read ? `<div style="width:7px;height:7px;border-radius:50%;
+                         background:var(--blue);flex-shrink:0;margin-top:4px"></div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function markNotifRead(id) {
+  const n = notifications.find(n => n.id === id);
+  if (n) n.read = true;
+  renderNotifPanel();
+  updateNotifBadge();
+}
+
+function clearAllNotifs() {
+  notifications = [];
+  renderNotifPanel();
+  updateNotifBadge();
+}
+
+function toggleNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // Mark all as read when opened
+    setTimeout(() => {
+      notifications.forEach(n => n.read = true);
+      updateNotifBadge();
+      renderNotifPanel();
+    }, 1500);
+  }
+}
+
+// Close panel when clicking outside
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('notif-panel');
+  const bell  = document.getElementById('notif-bell');
+  if (panel && bell && !panel.contains(e.target) && !bell.contains(e.target)) {
+    panel.style.display = 'none';
+  }
+});
+
+function getTimeAgo(date) {
+  const diff = Math.floor((Date.now() - new Date(date)) / 1000);
+  if (diff < 60)  return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -894,6 +1046,11 @@ function getDeptIcon(dept) {
 }
 
 function onConcernChange() {
+    document.getElementById('time-slot-card').style.display = 'none';
+  document.getElementById('booking-summary-empty').style.display = 'block';
+  document.getElementById('booking-summary-filled').style.display = 'none';
+  selectedStaffObj = null; selectedTime = null;
+
   const concern = document.getElementById('concern-type-early').value;
   const dept = CONCERN_DEPT[concern] || '';
   const label = document.getElementById('concern-dept-label');
@@ -1050,6 +1207,7 @@ async function doRegister() {
   }
 }
 
+
 // ═══════════════════════════════════════════════════════
 // LOGOUT
 // ═══════════════════════════════════════════════════════
@@ -1199,6 +1357,15 @@ async function loadData() {
     ]);
     if (apptRes.status==='ok') allAppts = apptRes.data || [];
     if (userRes.status==='ok') allUsers = userRes.data || [];
+
+   const newPending = allAppts.filter(a => a['Status'] === 'Pending');
+        if (currentUser?.role === 'admin' && newPending.length > 0) {
+          if (!window._lastPendingCount) window._lastPendingCount = 0;
+          if (newPending.length > window._lastPendingCount) {
+            addNotif(`${newPending.length - window._lastPendingCount} new appointment(s) pending approval`, 'booking');
+          }
+          window._lastPendingCount = newPending.length;
+        }
 
     document.getElementById('rt-sync').textContent =
       'Last sync: ' + new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
@@ -1697,6 +1864,7 @@ async function studentCancelAppt(apptId, btn) {
     if(res.status==='ok'){
       appt['Status']='Cancelled';
       toast('Appointment cancelled.','amber');
+      addNotif('Your appointment has been cancelled.', 'warning');
       renderStudentAppts();
     }
   } catch(e){
@@ -1755,6 +1923,7 @@ async function submitBooking() {
         'Notes':'','Status':'Pending','userId':currentUser.id
       });
       toast('Appointment booked! Awaiting admin confirmation.','green');
+      addNotif(`Booking submitted! ${selectedDate} at ${selectedTime}`, 'booking');
       renderStudentAppts();
       // Reset state
       selectedDate=null; selectedStaffObj=null; selectedTime=null;
