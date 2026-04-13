@@ -679,9 +679,13 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
     <div class="sec-title">Staff availability</div>
             <span style="font-size:11px;color:var(--text2)" id="selected-date-label">Select a date above</span>
           </div>
-          <div class="avail-grid" id="staff-avail-grid">
-            <div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">Select a Mon–Thu date to see who is available</div>
-          </div>
+         <div id="staff-avail-grid">
+  <div style="text-align:center;padding:32px 16px">
+    <div style="font-size:36px;margin-bottom:10px">💬</div>
+    <div style="font-family:var(--font-head);font-weight:800;font-size:14px;color:var(--text);margin-bottom:6px">What's your concern?</div>
+    <div style="font-size:12px;color:var(--text2)">Please select a nature of concern above first — we'll show you the right staff member to help you.</div>
+  </div>
+</div>
         </div>
         <div class="card" id="time-slot-card" style="display:none">
           <div class="sec-title" id="time-slot-title" style="font-family:var(--font-head);font-weight:800;margin-bottom:12px">Available time slots</div>
@@ -729,6 +733,46 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
       <button onclick="closeEmpDayModal()" style="width:28px;height:28px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
     <div id="emp-modal-appts"></div>
+  </div>
+</div>
+
+<!-- EMPLOYEE WELCOME POPUP -->
+<div id="emp-welcome-modal" style="display:none;position:fixed;inset:0;z-index:9999;
+     background:rgba(0,0,0,.5);backdrop-filter:blur(6px);
+     align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);
+              border-radius:20px;padding:28px;width:420px;max-width:95vw;
+              box-shadow:0 24px 60px rgba(0,0,0,.2);animation:authIn .3s ease both">
+    
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:48px;margin-bottom:10px">👋</div>
+      <div style="font-family:var(--font-head);font-weight:900;font-size:20px;
+                  color:var(--text);margin-bottom:6px" id="emp-welcome-title">
+        Welcome back!
+      </div>
+      <div style="font-size:12px;color:var(--text2)" id="emp-welcome-sub"></div>
+    </div>
+
+    <!-- TODAY'S APPOINTMENTS -->
+    <div id="emp-welcome-today" style="margin-bottom:14px">
+      <div style="font-family:var(--font-head);font-weight:800;font-size:11px;
+                  text-transform:uppercase;letter-spacing:.06em;color:var(--text3);
+                  margin-bottom:8px">📅 Today's appointments</div>
+      <div id="emp-welcome-today-list"></div>
+    </div>
+
+    <!-- UPCOMING -->
+    <div id="emp-welcome-upcoming" style="margin-bottom:20px">
+      <div style="font-family:var(--font-head);font-weight:800;font-size:11px;
+                  text-transform:uppercase;letter-spacing:.06em;color:var(--text3);
+                  margin-bottom:8px">🗓 Upcoming this week</div>
+      <div id="emp-welcome-upcoming-list"></div>
+    </div>
+
+    <button class="btn-primary" style="border-radius:var(--r)" 
+            onclick="closeEmpWelcome()">
+      Got it, let's go! →
+    </button>
   </div>
 </div>
 
@@ -1065,6 +1109,113 @@ function getDeptIcon(dept) {
   return icons[dept] || '👤';
 }
 
+// ═══════════════════════════════════════════════════════
+// EMPLOYEE WELCOME POPUP
+// ═══════════════════════════════════════════════════════
+function showEmpWelcomePopup() {
+  if (!currentUser || currentUser.role !== 'employee') return;
+
+  const fullName = (currentUser.firstName + ' ' + currentUser.lastName).trim();
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  // Get next 7 days
+  const next7 = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    next7.push(d.toISOString().slice(0, 10));
+  }
+
+  const myAppts = allAppts.filter(a =>
+    (a['Specific Person'] === fullName || a['Looking For'] === fullName) &&
+    a['Status'] !== 'Cancelled'
+  );
+
+  const todayAppts    = myAppts.filter(a => a['Date'] === todayStr);
+  const upcomingAppts = myAppts.filter(a => next7.includes(a['Date']));
+
+  // Don't show if nothing to notify
+  if (!todayAppts.length && !upcomingAppts.length) return;
+
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  document.getElementById('emp-welcome-title').textContent =
+    `${greet}, ${currentUser.firstName}! 👋`;
+  document.getElementById('emp-welcome-sub').textContent =
+    `Here's what's on your plate today — ${new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric'})}`;
+
+  const scMap = {
+    Confirmed: { badge:'badge-green', icon:'✅' },
+    Pending:   { badge:'badge-amber', icon:'⏳' },
+    Completed: { badge:'badge-blue',  icon:'✔️' },
+  };
+
+  // Render today
+  const todayEl = document.getElementById('emp-welcome-today-list');
+  const todayWrap = document.getElementById('emp-welcome-today');
+  if (todayAppts.length) {
+    todayEl.innerHTML = todayAppts.map(a => {
+      const s = scMap[a['Status']] || scMap.Pending;
+      return `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;
+                    background:var(--green-bg);border:1px solid rgba(29,158,117,.2);
+                    border-radius:var(--r);margin-bottom:6px">
+          <div style="font-size:18px">${s.icon}</div>
+          <div style="flex:1">
+            <div style="font-weight:800;font-family:var(--font-head);font-size:12px">
+              ${a['Full Name']}
+            </div>
+            <div style="font-size:11px;color:var(--text2)">
+              ${a['Time']} · ${a['Concern']}
+            </div>
+          </div>
+          <span class="badge ${s.badge}">${a['Status']}</span>
+        </div>`;
+    }).join('');
+  } else {
+    todayWrap.style.display = 'none';
+  }
+
+  // Render upcoming
+  const upcomingEl = document.getElementById('emp-welcome-upcoming-list');
+  const upcomingWrap = document.getElementById('emp-welcome-upcoming');
+  if (upcomingAppts.length) {
+    upcomingEl.innerHTML = upcomingAppts.slice(0, 4).map(a => {
+      const s = scMap[a['Status']] || scMap.Pending;
+      return `
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;
+                    background:var(--bg2);border:1px solid var(--border);
+                    border-radius:var(--r);margin-bottom:6px">
+          <div style="font-size:16px">${s.icon}</div>
+          <div style="flex:1">
+            <div style="font-weight:800;font-family:var(--font-head);font-size:12px">
+              ${a['Full Name']}
+            </div>
+            <div style="font-size:11px;color:var(--text2)">
+              ${a['Date']} · ${a['Time']} · ${a['Concern']}
+            </div>
+          </div>
+          <span class="badge ${s.badge}">${a['Status']}</span>
+        </div>`;
+    }).join('');
+    if (upcomingAppts.length > 4) {
+      upcomingEl.innerHTML += `
+        <div style="text-align:center;font-size:11px;color:var(--text3);padding:4px">
+          +${upcomingAppts.length - 4} more this week
+        </div>`;
+    }
+  } else {
+    upcomingWrap.style.display = 'none';
+  }
+
+  document.getElementById('emp-welcome-modal').style.display = 'flex';
+}
+
+function closeEmpWelcome() {
+  document.getElementById('emp-welcome-modal').style.display = 'none';
+}
+
 function onConcernChange() {
     document.getElementById('time-slot-card').style.display = 'none';
   document.getElementById('booking-summary-empty').style.display = 'block';
@@ -1392,9 +1543,16 @@ async function loadData() {
     const pending = allAppts.filter(a=>a['Status']==='Pending').length;
     document.getElementById('notif-dot').style.display = pending ? '' : 'none';
 
-    if (currentUser?.role==='admin')    renderAdminView();
-    if (currentUser?.role==='employee') renderEmployeeView();
-    if (currentUser?.role==='student')  renderStudentAppts();
+    if (currentUser?.role==='admin')   renderAdminView();
+if (currentUser?.role==='student') renderStudentAppts();
+if (currentUser?.role==='employee') {
+  renderEmployeeView();
+  // Show welcome popup only ONCE per session
+  if (!window._welcomeShown) {
+    window._welcomeShown = true;
+    setTimeout(() => showEmpWelcomePopup(), 800);
+  }
+}
 
   } catch (e) {
     document.getElementById('rt-sync').textContent = 'Sync failed · retrying…';
@@ -2158,8 +2316,32 @@ function closeModal(){
   document.getElementById('date-modal').style.display='none';
 }
 
+
+
 function closeModalAndSelect(){
   closeModal();
+
+    // Reset staff grid to prompt state
+  if (!concern) {
+    document.getElementById('staff-avail-grid').innerHTML = `
+      <div style="text-align:center;padding:32px 16px">
+        <div style="font-size:36px;margin-bottom:10px">💬</div>
+        <div style="font-family:var(--font-head);font-weight:800;font-size:14px;color:var(--text);margin-bottom:6px">What's your concern?</div>
+        <div style="font-size:12px;color:var(--text2)">Please select a nature of concern above first — we'll show you the right staff member to help you.</div>
+      </div>`;
+    // Still save the date
+    const y=_pendingDateY, m=_pendingDateM, d=_pendingDateD;
+    selectedDate=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const dow=new Date(y,m,d).getDay();
+    const dayName=DAYS_SH[dow];
+    document.getElementById('selected-date-label').textContent=MONTHS_L[m]+' '+d+', '+y+' ('+dayName+')';
+    document.querySelectorAll('#student-calendar-grid .cal-day').forEach(el=>{
+      el.classList.remove('cal-selected');
+      if(parseInt(el.querySelector('span')?.textContent)===d&&isWorkDay(y,m,d)) el.classList.add('cal-selected');
+    });
+    return; // Stop here — don't show staff yet
+  }
+
   const y=_pendingDateY, m=_pendingDateM, d=_pendingDateD;
   document.querySelectorAll('#student-calendar-grid .cal-day').forEach(el=>{
     el.classList.remove('cal-selected');
