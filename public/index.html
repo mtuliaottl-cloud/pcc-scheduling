@@ -2321,7 +2321,20 @@ function closeModal(){
 function closeModalAndSelect(){
   closeModal();
 
-    // Reset staff grid to prompt state
+  const y=_pendingDateY, m=_pendingDateM, d=_pendingDateD;
+  const dow=new Date(y,m,d).getDay();
+  const dayName=DAYS_SH[dow];
+  selectedDate=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+
+  document.querySelectorAll('#student-calendar-grid .cal-day').forEach(el=>{
+    el.classList.remove('cal-selected');
+    if(parseInt(el.querySelector('span')?.textContent)===d&&isWorkDay(y,m,d)) el.classList.add('cal-selected');
+  });
+
+  document.getElementById('selected-date-label').textContent=MONTHS_L[m]+' '+d+', '+y+' ('+dayName+')';
+
+  const concern = document.getElementById('concern-type-early')?.value || '';
+
   if (!concern) {
     document.getElementById('staff-avail-grid').innerHTML = `
       <div style="text-align:center;padding:32px 16px">
@@ -2329,57 +2342,68 @@ function closeModalAndSelect(){
         <div style="font-family:var(--font-head);font-weight:800;font-size:14px;color:var(--text);margin-bottom:6px">What's your concern?</div>
         <div style="font-size:12px;color:var(--text2)">Please select a nature of concern above first — we'll show you the right staff member to help you.</div>
       </div>`;
-    // Still save the date
-    const y=_pendingDateY, m=_pendingDateM, d=_pendingDateD;
-    selectedDate=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const dow=new Date(y,m,d).getDay();
-    const dayName=DAYS_SH[dow];
-    document.getElementById('selected-date-label').textContent=MONTHS_L[m]+' '+d+', '+y+' ('+dayName+')';
-    document.querySelectorAll('#student-calendar-grid .cal-day').forEach(el=>{
-      el.classList.remove('cal-selected');
-      if(parseInt(el.querySelector('span')?.textContent)===d&&isWorkDay(y,m,d)) el.classList.add('cal-selected');
-    });
-    return; // Stop here — don't show staff yet
+    return;
   }
 
-  const y=_pendingDateY, m=_pendingDateM, d=_pendingDateD;
-  document.querySelectorAll('#student-calendar-grid .cal-day').forEach(el=>{
-    el.classList.remove('cal-selected');
-    if(parseInt(el.querySelector('span')?.textContent)===d&&isWorkDay(y,m,d)) el.classList.add('cal-selected');
-  });
-  const dow=new Date(y,m,d).getDay();
-  const dayName=DAYS_SH[dow];
-  selectedDate=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-  document.getElementById('selected-date-label').textContent=MONTHS_L[m]+' '+d+', '+y+' ('+dayName+')';
+  // Both date AND concern selected — show staff
+  const staffData = getStaffAvailForDay(dayName, concern);
+  const grid = document.getElementById('staff-avail-grid');
 
-  const concern = document.getElementById('concern-type-early')?.value || document.getElementById('concern-type')?.value || '';
-const staffData=getStaffAvailForDay(dayName, concern);
- const grid=document.getElementById('staff-avail-grid');
-  grid.innerHTML=staffData.length ? staffData.map((s,i)=>{
-    const dot =s.avail?'var(--green)':'var(--border2)';
-   const hint=s.avail&&s.slots.length>0?s.slots.length+' slot'+(s.slots.length!==1?'s':'')+' available':s.avail&&s.slots.length===0?'Fully booked today':'On leave / unavailable';
-const isFullyBooked=s.avail&&s.slots.length===0;
-    const hc=!s.avail?'var(--text3)':isFullyBooked?'var(--red-t)':'var(--green-t)';
-   const cls ='avail-slot'+(!s.avail||isFullyBooked?' unavail':'');
-const click=s.avail&&!isFullyBooked?`onclick="selectStaff(${i},'${dayName}')"` :'';
-    return `<div class="${cls}" id="staff-slot-${i}" ${click}>
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
-        <div class="avail-dot" style="background:${dot}"></div>
-        <div class="avail-name">${s.name}</div>
-      </div>
-      <div style="display:inline-flex;align-items:center;gap:5px;margin-top:3px">
-        <span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--font-head);background:${getDeptColor(s.role).bg};color:${getDeptColor(s.role).t}">${s.role}</span>
-      </div>
-      <div style="font-size:11px;color:${hc};margin-top:4px;font-weight:700">${hint}</div>
+  grid.innerHTML = staffData.length ? staffData.map((s,i) => {
+    const isFull = s.avail && s.slots.length === 0;
+    const isUnavail = !s.avail;
+    const clickable = s.avail && !isFull;
+    const borderColor = isUnavail||isFull ? 'var(--border)' : 'var(--green)';
+    const bgColor = isUnavail||isFull ? 'var(--bg2)' : 'var(--green-bg)';
+    const dotColor = isUnavail ? 'var(--border2)' : isFull ? 'var(--red)' : 'var(--green)';
+    const statusText = isUnavail ? 'Unavailable' : isFull ? 'Fully booked' : s.slots.length+' slot'+(s.slots.length!==1?'s':'')+' open';
+    const statusColor = isUnavail ? 'var(--text3)' : isFull ? 'var(--red-t)' : 'var(--green-t)';
+    const badgeClass = isUnavail||isFull ? 'badge-red' : 'badge-green';
+    const badgeText = isUnavail ? 'Unavailable' : isFull ? 'Full' : 'Available';
+    const cursor = clickable ? 'pointer' : 'not-allowed';
+    const opacity = isUnavail||isFull ? '0.6' : '1';
+    const click = clickable ? `onclick="selectStaff(${i},'${dayName}')"` : '';
+
+    return `
+      <div class="avail-slot" id="staff-slot-${i}" ${click}
+        style="border:2px solid ${borderColor};background:${bgColor};
+               cursor:${cursor};opacity:${opacity};border-radius:12px;padding:14px;
+               transition:all .2s;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:10px;background:var(--surface);
+                        display:flex;align-items:center;justify-content:center;
+                        font-family:var(--font-head);font-weight:800;font-size:13px;
+                        color:var(--blue);border:1px solid var(--border)">
+              ${(s.name.split(' ')[0][0]+(s.name.split(' ')[1]?.[0]||'')).toUpperCase()}
+            </div>
+            <div>
+              <div style="font-weight:800;font-family:var(--font-head);font-size:13px">${s.name}</div>
+              <div style="font-size:10px;padding:2px 7px;border-radius:20px;display:inline-block;margin-top:2px;
+                          background:${getDeptColor(s.role).bg};color:${getDeptColor(s.role).t};
+                          font-weight:700;font-family:var(--font-head)">${s.role}</div>
+            </div>
+          </div>
+          <span class="badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:${statusColor};font-weight:700">
+          <div style="width:6px;height:6px;border-radius:50%;background:${dotColor}"></div>
+          ${statusText}
+        </div>
+        ${clickable ? `<div style="font-size:11px;color:var(--text3);margin-top:6px">Click to select and choose a time slot</div>` : ''}
+      </div>`;
+  }).join('')
+  : `<div style="grid-column:1/-1;text-align:center;padding:32px 16px">
+      <div style="font-size:36px;margin-bottom:10px">😔</div>
+      <div style="font-family:var(--font-head);font-weight:800;font-size:14px;color:var(--text);margin-bottom:6px">No staff available</div>
+      <div style="font-size:12px;color:var(--text2)">No staff found for <strong>${concern}</strong> on this date.</div>
     </div>`;
-   }).join('') : '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">No staff available for this concern type. Please select a different concern.</div>';
 
   document.getElementById('time-slot-card').style.display='none';
-  document.getElementById('booking-summary-empty').style.display ='block';
+  document.getElementById('booking-summary-empty').style.display='block';
   document.getElementById('booking-summary-filled').style.display='none';
   selectedStaffObj=null; selectedTime=null;
 }
-
 function selectStaff(i,dayName){
   document.querySelectorAll('.avail-slot').forEach(el=>el.classList.remove('selected'));
   document.getElementById('staff-slot-'+i)?.classList.add('selected');
