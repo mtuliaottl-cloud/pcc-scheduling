@@ -380,7 +380,43 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
       </div>
       <div>
         <div class="card" style="margin-bottom:12px">
-          <div class="sec-header"><div class="sec-title">Employees</div></div>
+       <div class="sec-header">
+  <div class="sec-title">Employees</div>
+  <button class="btn btn-sm" 
+    style="background:var(--blue);color:#fff;border-color:var(--blue)"
+    onclick="showAddEmpForm()">+ Add Employee</button>
+</div>
+<div id="add-emp-form" style="display:none;margin-bottom:12px;padding:12px;background:var(--bg2);border-radius:var(--r)">
+  <div class="grid-2" style="gap:8px;margin-bottom:8px">
+    <div><div class="card-label" style="margin-bottom:4px">First name</div>
+      <input type="text" class="field" id="new-emp-fname" style="font-size:12px"></div>
+    <div><div class="card-label" style="margin-bottom:4px">Last name</div>
+      <input type="text" class="field" id="new-emp-lname" style="font-size:12px"></div>
+  </div>
+  <div style="margin-bottom:8px">
+    <div class="card-label" style="margin-bottom:4px">Email</div>
+    <input type="email" class="field" id="new-emp-email" style="font-size:12px">
+  </div>
+  <div style="margin-bottom:8px">
+    <div class="card-label" style="margin-bottom:4px">Department</div>
+    <select class="field" id="new-emp-dept" style="font-size:12px">
+      <option>Admin Office</option>
+      <option>IT Department</option>
+      <option>Finance Office</option>
+      <option>Academic Affairs</option>
+      <option>Human Resources</option>
+    </select>
+  </div>
+  <div style="margin-bottom:8px">
+    <div class="card-label" style="margin-bottom:4px">Temporary password</div>
+    <input type="text" class="field" id="new-emp-pass" style="font-size:12px" placeholder="min 8 characters">
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn-primary" style="border-radius:var(--r);font-size:12px;padding:8px" 
+      onclick="adminAddEmployee()">Create Employee</button>
+    <button class="btn btn-sm" onclick="showAddEmpForm()">Cancel</button>
+  </div>
+</div>
           <div id="emp-list" class="scroll-area"></div>
         </div>
         <div class="card" style="margin-bottom:12px">
@@ -1187,6 +1223,47 @@ function renderAdminChart() {
         </div>`).join('')
     :'<div style="font-size:12px;color:var(--text3)">No data yet</div>';
 }
+
+function showAddEmpForm() {
+  const f = document.getElementById('add-emp-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+async function adminAddEmployee() {
+  const fname = document.getElementById('new-emp-fname').value.trim();
+  const lname = document.getElementById('new-emp-lname').value.trim();
+  const email = document.getElementById('new-emp-email').value.trim();
+  const dept  = document.getElementById('new-emp-dept').value;
+  const pass  = document.getElementById('new-emp-pass').value;
+
+  if (!fname || !lname || !email || !pass) 
+    return toast('Please fill in all fields.', 'amber');
+  if (pass.length < 8) 
+    return toast('Password must be at least 8 characters.', 'amber');
+
+  try {
+    const res = await apiPost(API.auth, {
+      action: 'register',
+      firstName: fname,
+      lastName: lname,
+      email,
+      password: pass,
+      role: 'employee',
+      sid: '—',
+      dept,
+    });
+    if (res.status === 'ok') {
+      toast(`Employee ${fname} ${lname} added!`, 'green');
+      showAddEmpForm(); // hide form
+      loadData(); // refresh list
+    } else {
+      toast(res.message || 'Failed to create employee.', 'red');
+    }
+  } catch(e) {
+    toast('Network error. Please retry.', 'red');
+  }
+}
+
 
 function exportCSV() {
   if(!allAppts.length) return toast('No data to export.','amber');
