@@ -235,17 +235,20 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
     <div id="register-form" style="display:none">
       <div style="margin-bottom:13px">
         <div class="card-label" style="margin-bottom:7px">I am a…</div>
-        <div class="role-grid">
-          <div class="role-card selected" onclick="selectRole(this,'student')" data-role="student">
-            <div class="role-icon">🎓</div><div class="role-name">Student</div>
-          </div>
-          <div class="role-card" onclick="selectRole(this,'employee')" data-role="employee">
-            <div class="role-icon">👤</div><div class="role-name">Employee</div>
-          </div>
-          <div class="role-card" onclick="selectRole(this,'admin')" data-role="admin">
-            <div class="role-icon">⚡</div><div class="role-name">Admin</div>
-          </div>
-        </div>
+     <div class="role-grid" id="role-grid">
+  <div class="role-card selected" onclick="selectRole(this,'student')" data-role="student">
+    <div class="role-icon">🎓</div><div class="role-name">Student</div>
+  </div>
+  <!-- Staff-only cards, hidden by default -->
+  <div class="role-card" onclick="selectRole(this,'employee')" data-role="employee" 
+       id="role-employee" style="display:none">
+    <div class="role-icon">👤</div><div class="role-name">Employee</div>
+  </div>
+  <div class="role-card" onclick="selectRole(this,'admin')" data-role="admin" 
+       id="role-admin" style="display:none">
+    <div class="role-icon">⚡</div><div class="role-name">Admin</div>
+  </div>
+</div>
       </div>
       <div class="grid-2" style="gap:8px;margin-bottom:10px">
         <div><div class="field-label">First name</div><input type="text" class="field" id="reg-fname" placeholder="Juan"></div>
@@ -1255,6 +1258,17 @@ function toggleLeaveForm() {
   const f=document.getElementById('leave-form');
   f.style.display=f.style.display==='none'?'block':'none';
 }
+
+
+// Show staff login only if URL contains ?staff=true
+(function checkStaffMode() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('staff') === 'true') {
+    document.getElementById('role-employee').style.display = '';
+    document.getElementById('role-admin').style.display = '';
+  }
+})();
+
 
 function submitLeaveRequest() {
   if(!currentUser) return;
