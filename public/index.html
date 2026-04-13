@@ -1697,8 +1697,8 @@ function closeModalAndSelect(){
 
   const concern = document.getElementById('concern-type-early')?.value || document.getElementById('concern-type')?.value || '';
 const staffData=getStaffAvailForDay(dayName, concern);
-  const grid=document.getElementById('staff-avail-grid');
-  grid.innerHTML=staffData.map((s,i)=>{
+ const grid=document.getElementById('staff-avail-grid');
+  grid.innerHTML=staffData.length ? staffData.map((s,i)=>{
     const dot =s.avail?'var(--green)':'var(--border2)';
    const hint=s.avail&&s.slots.length>0?s.slots.length+' slot'+(s.slots.length!==1?'s':'')+' available':s.avail&&s.slots.length===0?'Fully booked today':'On leave / unavailable';
 const isFullyBooked=s.avail&&s.slots.length===0;
