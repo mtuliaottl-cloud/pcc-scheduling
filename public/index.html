@@ -801,6 +801,29 @@ async function doLogin() {
 }
 
 
+
+function getDeptColor(dept) {
+  const map = {
+    'IT Department':    {bg:'var(--blue-bg)',  t:'var(--blue-t)'},
+    'Finance Office':   {bg:'var(--green-bg)', t:'var(--green-t)'},
+    'Academic Affairs': {bg:'var(--purple-bg)',t:'var(--purple-t)'},
+    'Admin Office':     {bg:'var(--amber-bg)', t:'var(--amber-t)'},
+    'Human Resources':  {bg:'var(--teal-bg)',  t:'var(--teal-t)'},
+  };
+  return map[dept] || {bg:'var(--bg2)', t:'var(--text2)'};
+}
+
+function getDeptIcon(dept) {
+  const icons = {
+    'IT Department':    '💻',
+    'Finance Office':   '💰',
+    'Academic Affairs': '📚',
+    'Admin Office':     '🏢',
+    'Human Resources':  '👥',
+  };
+  return icons[dept] || '👤';
+}
+
 function onConcernChange() {
   const concern = document.getElementById('concern-type-early').value;
   const dept = CONCERN_DEPT[concern] || '';
@@ -1710,7 +1733,9 @@ const click=s.avail&&!isFullyBooked?`onclick="selectStaff(${i},'${dayName}')"` :
         <div class="avail-dot" style="background:${dot}"></div>
         <div class="avail-name">${s.name}</div>
       </div>
-      <div class="avail-role">${s.role}</div>
+      <div style="display:inline-flex;align-items:center;gap:5px;margin-top:3px">
+        <span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--font-head);background:${getDeptColor(s.role).bg};color:${getDeptColor(s.role).t}">${s.role}</span>
+      </div>
       <div style="font-size:11px;color:${hc};margin-top:4px;font-weight:700">${hint}</div>
     </div>`;
    }).join('') : '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">No staff available for this concern type. Please select a different concern.</div>';
