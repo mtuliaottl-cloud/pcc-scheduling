@@ -1623,7 +1623,7 @@ function renderAdminView() {
     : '<tr><td colspan="7" class="empty">No appointments yet</td></tr>';
 
   const userBody = document.getElementById('admin-user-body');
-
+      
 userBody.innerHTML = visibleUsers.length
     ? visibleUsers.map(u => {
         const rc = ROLE_COLOR[u.role]||'blue';
