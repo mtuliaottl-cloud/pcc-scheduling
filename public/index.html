@@ -10,7 +10,7 @@
 :root {
   --bg:#f0f2f7;--bg2:#e8eaf2;--bg3:#dde0ec;--surface:#ffffff;--surface2:#f5f6fa;
   --border:#e0e3ef;--border2:#c8ccde;--text:#1a1d2e;--text2:#5a6080;--text3:#9ba3c2;
-  --blue:#129406;--blue-bg:rgba(59,111,245,.08);--blue-t:#0dbd1b;
+  --blue:#19960e;--blue-bg:rgba(59,111,245,.08);--blue-t:#0dbd1b;
   --green:#1D9E75;--green-bg:rgba(29,158,117,.08);--green-t:#1D9E75;
   --amber:#e6a817;--amber-bg:rgba(230,168,23,.1);--amber-t:#b07d00;
   --red:#e84040;--red-bg:rgba(232,64,64,.08);--red-t:#c02020;
@@ -1587,7 +1587,7 @@ const employees = isFullAdmin
 document.getElementById('kpi-appt').textContent    = allAppts.length;
 document.getElementById('kpi-pending').textContent = pending.length;
 document.getElementById('kpi-today').textContent   = todayApts.length;  document.getElementById('admin-appt-badge').textContent = allAppts.length + ' total';
-  document.getElementById('admin-user-badge').textContent = visibleUsers.length + ' users';
+  document.getElementById('admin-user-badge').textContent = allUsers.length + ' users';
 
   const apptBody = document.getElementById('admin-appt-body');
   apptBody.innerHTML = visibleAppts.length
@@ -1612,14 +1612,9 @@ document.getElementById('kpi-today').textContent   = todayApts.length;  document
       }).join('')
     : '<tr><td colspan="7" class="empty">No appointments yet</td></tr>';
 
-const userBody = document.getElementById('admin-user-body');
-const visibleUsers = isFullAdmin 
-  ? allUsers 
-  : allUsers.filter(u => 
-      u.role === 'employee' && (u.dept || '').trim() === adminDept
-    );
-userBody.innerHTML = visibleUsers.length
-    ? visibleUsers.map(u => {
+  const userBody = document.getElementById('admin-user-body');
+  userBody.innerHTML = allUsers.length
+    ? allUsers.map(u => {
         const rc = ROLE_COLOR[u.role]||'blue';
         return `<tr>
           <td style="font-weight:700;font-family:var(--font-head)">${u.firstName} ${u.lastName}</td>
