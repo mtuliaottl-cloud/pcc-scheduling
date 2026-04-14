@@ -1568,26 +1568,35 @@ const ROLE_COLOR = {admin:'red',employee:'blue',student:'green'};
 
 function renderAdminView() {
   const adminDept = (currentUser.dept || '').trim();
-const isFullAdmin = !adminDept || adminDept === '—' || adminDept === 'Admin Office';
+  const isFullAdmin = !adminDept || adminDept === '—' || adminDept === 'Admin Office';
 
-// Filter appointments by admin's department
-const visibleAppts = isFullAdmin 
-  ? allAppts 
-  : allAppts.filter(a => CONCERN_DEPT[a['Concern']] === adminDept);
+  // Filter appointments by admin's department
+  const visibleAppts = isFullAdmin
+    ? allAppts
+    : allAppts.filter(a => CONCERN_DEPT[a['Concern']] === adminDept);
 
-// Employees panel filtered by admin's dept
-const employees = isFullAdmin
-  ? allUsers.filter(u => u.role === 'employee')
-  : allUsers.filter(u => u.role === 'employee' && (u.dept || '').trim() === adminDept);
+  // Employees panel filtered by admin's dept
+  const employees = isFullAdmin
+    ? allUsers.filter(u => u.role === 'employee')
+    : allUsers.filter(u => u.role === 'employee' && (u.dept || '').trim() === adminDept);
+
+  // Visible users filtered by admin's dept
+  const visibleUsers = isFullAdmin
+    ? allUsers
+    : allUsers.filter(u =>
+        (u.role === 'employee' && (u.dept || '').trim() === adminDept) ||
+        (u.role === 'admin' && (u.dept || '').trim() === adminDept)
+      );
 
   const todayStr  = new Date().toISOString().slice(0,10);
   const pending   = visibleAppts.filter(a=>a['Status']==='Pending');
   const todayApts = visibleAppts.filter(a=>a['Date']===todayStr);
 
   document.getElementById('kpi-emp').textContent     = employees.length;
-document.getElementById('kpi-appt').textContent    = allAppts.length;
-document.getElementById('kpi-pending').textContent = pending.length;
-document.getElementById('kpi-today').textContent   = todayApts.length;  document.getElementById('admin-appt-badge').textContent = allAppts.length + ' total';
+  document.getElementById('kpi-appt').textContent    = allAppts.length;
+  document.getElementById('kpi-pending').textContent = pending.length;
+  document.getElementById('kpi-today').textContent   = todayApts.length;
+  document.getElementById('admin-appt-badge').textContent = allAppts.length + ' total';
   document.getElementById('admin-user-badge').textContent = visibleUsers.length + ' users';
 
   const apptBody = document.getElementById('admin-appt-body');
@@ -1614,12 +1623,7 @@ document.getElementById('kpi-today').textContent   = todayApts.length;  document
     : '<tr><td colspan="7" class="empty">No appointments yet</td></tr>';
 
   const userBody = document.getElementById('admin-user-body');
-const visibleUsers = isFullAdmin 
-  ? allUsers 
-  : allUsers.filter(u => 
-      (u.role === 'employee' && (u.dept || '').trim() === adminDept) ||
-      (u.role === 'admin' && (u.dept || '').trim() === adminDept)
-    );
+
 userBody.innerHTML = visibleUsers.length
     ? visibleUsers.map(u => {
         const rc = ROLE_COLOR[u.role]||'blue';
