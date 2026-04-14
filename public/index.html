@@ -550,16 +550,7 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
             <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--border2);margin-right:4px"></span>No work (Fri–Sun)</span>
           </div>
         </div>
-        <div class="card">
-          <div class="sec-header">
-            <div class="sec-title">Shift management</div>
-            <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue)" onclick="releaseShift()">+ Release shift</button>
-          </div>
-          <div style="margin-bottom:12px">
-            <div class="card-label" style="margin-bottom:8px">Open shifts available</div>
-            <div id="open-shifts-list"></div>
-          </div>
-        </div>
+       
       </div>
       <div>
         <div class="card" style="margin-bottom:12px">
@@ -960,12 +951,6 @@ let allUsers     = [];
 let refreshTimer = null;
 let selectedDate = null, selectedStaffObj = null, selectedTime = null;
 let leaveRequests = {};
-let openShifts = [
-  { id:'shift-1', date:'Mon Apr 14', dept:'Admin Office',    time:'8AM–5PM',  claimedBy:null },
-  { id:'shift-2', date:'Tue Apr 15', dept:'IT Department',   time:'1PM–5PM',  claimedBy:null },
-  { id:'shift-3', date:'Wed Apr 16', dept:'Finance Office',  time:'8AM–12PM', claimedBy:null },
-  { id:'shift-4', date:'Thu Apr 17', dept:'Academic Affairs',time:'9AM–5PM',  claimedBy:null },
-];
 
 // ═══════════════════════════════════════════════════════
 // API HELPERS
@@ -1861,7 +1846,7 @@ if(empDateLbl && currentUser.dept) {
     :'<div class="empty">No appointments assigned to you yet</div>';
 
   renderLeaveRequests();
-  renderOpenShifts();
+
   renderCalendar('emp-calendar-grid','emp-calendar-head','emp-cal-title',empYear,empMonth,'emp',myAppts);
 }
 
