@@ -1393,7 +1393,7 @@ function launchApp() {
   updateClock();
   setInterval(updateClock, 1000);
   loadData();
-  refreshTimer = setInterval(loadData, 30000);
+  refreshTimer = setInterval(loadData, 120000);
 }
 
 function setupNav() {
@@ -1549,7 +1549,7 @@ if (currentUser?.role==='employee') {
 
  } catch (e) {
   document.getElementById('rt-sync').textContent = 'Sync failed · retrying…';
-  setTimeout(loadData, 5000); // retry after 5 seconds
+ 
 }
 }
 
