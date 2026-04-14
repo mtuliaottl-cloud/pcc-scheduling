@@ -1298,34 +1298,43 @@ function onConcernChange() {
     const opacity = isUnavail || isFull ? '0.6' : '1';
     const click = clickable ? `onclick="selectStaff(${i},'${dayName}')"` : '';
 
-    return `
-      <div class="avail-slot" id="staff-slot-${i}" ${click}
-        style="border:2px solid ${borderColor};background:${bgColor};
-               cursor:${cursor};opacity:${opacity};border-radius:12px;padding:14px;
-               transition:all .2s;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="width:36px;height:36px;border-radius:10px;background:var(--surface);
-                        display:flex;align-items:center;justify-content:center;
-                        font-family:var(--font-head);font-weight:800;font-size:13px;
-                        color:var(--blue);border:1px solid var(--border)">
-              ${(s.name.split(' ')[0][0] + (s.name.split(' ')[1]?.[0] || '')).toUpperCase()}
-            </div>
-            <div>
-              <div style="font-weight:800;font-family:var(--font-head);font-size:13px">${s.name}</div>
-              <div style="font-size:10px;padding:2px 7px;border-radius:20px;display:inline-block;margin-top:2px;
-                          background:${getDeptColor(s.role).bg};color:${getDeptColor(s.role).t};
-                          font-weight:700;font-family:var(--font-head)">${s.role}</div>
-            </div>
-          </div>
-          <span class="badge ${badgeClass}">${badgeText}</span>
+return `
+  <div class="avail-slot" id="staff-slot-${i}" ${click}
+    style="border:1.5px solid ${borderColor};background:${bgColor};
+           cursor:${cursor};opacity:${opacity};border-radius:12px;padding:10px 12px;
+           transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.04);">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:34px;height:34px;border-radius:10px;flex-shrink:0;
+                  background:var(--surface);border:1.5px solid ${borderColor};
+                  display:flex;align-items:center;justify-content:center;
+                  font-family:var(--font-head);font-weight:900;font-size:12px;
+                  color:${statusColor}">
+        ${(s.name.split(' ')[0][0]+(s.name.split(' ')[1]?.[0]||'')).toUpperCase()}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:800;font-family:var(--font-head);font-size:12px;
+                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          ${s.name}
         </div>
-        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:${statusColor};font-weight:700">
-          <div style="width:6px;height:6px;border-radius:50%;background:${dotColor}"></div>
+        <div style="display:flex;align-items:center;gap:5px;margin-top:2px">
+          <span style="font-size:10px;padding:1px 6px;border-radius:20px;
+                       background:${getDeptColor(s.role).bg};color:${getDeptColor(s.role).t};
+                       font-weight:700;font-family:var(--font-head)">${s.role}</span>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <span class="badge ${badgeClass}" style="font-size:9px">${badgeText}</span>
+        <div style="font-size:10px;color:${statusColor};font-weight:700;margin-top:3px">
           ${statusText}
         </div>
-        ${clickable ? `<div style="font-size:11px;color:var(--text3);margin-top:6px">Click to select and choose a time slot</div>` : ''}
-      </div>`;
+      </div>
+    </div>
+    ${clickable ? `
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid ${borderColor};
+                font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px">
+      <span>👆</span> Tap to select a time slot
+    </div>` : ''}
+  </div>`;
   }).join('');
 }
 
