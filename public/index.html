@@ -1581,16 +1581,16 @@ const COLORS = {
 const ROLE_COLOR = {admin:'red',employee:'blue',student:'green'};
 
 function renderAdminView() {
-  const adminDept = currentUser.dept || '';
-  const isFullAdmin = !adminDept || adminDept === '—' || adminDept === 'Admin Office';
+  const adminDept = (currentUser.dept || '').trim();
+const isFullAdmin = !adminDept || adminDept === '—' || adminDept === 'Admin Office';
 
-  // Filter appointments by department if admin has a specific dept
-  const visibleAppts = isFullAdmin ? allAppts : allAppts.filter(a => {
-    const apptDept = CONCERN_DEPT[a['Concern']] || '';
-    return apptDept === adminDept || a['Specific Person'] === (currentUser.firstName+' '+currentUser.lastName).trim();
-  });
+// All admins see all appointments
+const visibleAppts = allAppts;
 
-const employees = allUsers.filter(u => u.role === 'employee');
+// Employees panel filtered by admin's dept
+const employees = isFullAdmin
+  ? allUsers.filter(u => u.role === 'employee')
+  : allUsers.filter(u => u.role === 'employee' && (u.dept || '').trim() === adminDept);
 
   const todayStr  = new Date().toISOString().slice(0,10);
   const pending   = visibleAppts.filter(a=>a['Status']==='Pending');
