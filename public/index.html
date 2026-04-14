@@ -946,7 +946,7 @@ function getTimeAgo(date) {
 
 const CONCERN_DEPT = {
   'General inquiry':   'Admin Office',
-  'Documentation':     'Registrar',    
+  'Documentation':     'Registrar',       
   'Financial':         'Finance Office',
   'Academic':          'Academic Affairs',
   'Technical support': 'IT Department',
@@ -1829,7 +1829,11 @@ if(empDateLbl && currentUser.dept) {
   const roleEl=document.getElementById('emp-role-display');
   if(roleEl) roleEl.textContent=(currentUser.role||'').charAt(0).toUpperCase()+(currentUser.role||'').slice(1);
 
-  const myAppts   = allAppts.filter(a=>a['Specific Person']===fullName.trim()||a['Looking For']===fullName.trim());
+  const myAppts = allAppts.filter(a => {
+  const isAssignedToMe = a['Specific Person'] === fullName.trim() || a['Looking For'] === fullName.trim();
+  const isDeptMatch = CONCERN_DEPT[a['Concern']] === currentUser.dept;
+  return isAssignedToMe || isDeptMatch;
+});
   const myPending = myAppts.filter(a=>a['Status']==='Pending');
   const todayStr  = new Date().toISOString().slice(0,10);
   const myToday   = myAppts.filter(a=>a['Date']===todayStr);
@@ -2156,28 +2160,40 @@ if(!subConcern)  return toast('Please select a specific concern.','amber');
 
 const TIME_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM'];
 
+// REPLACE this function in your HTML:
+
 function getStaffAvailForDay(dayName, concernType) {
   let employees = allUsers.filter(u => u.role === 'employee');
 
-  // Filter by department if concern is selected
-if(concernType && CONCERN_DEPT[concernType]) {
-    const targetDept = CONCERN_DEPT[concernType];
-    employees = employees.filter(e => e.dept === targetDept);
+  // STRICT department filter — always filter if concernType is set
+  if (concernType) {
+    const targetDept = CONCERN_DEPT[concernType] || null;
+    if (targetDept) {
+      employees = employees.filter(e => {
+        const empDept = (e.dept || '').trim();
+        return empDept === targetDept;
+      });
+    }
+    // If no targetDept mapping exists, show no one (unknown concern)
+    if (!targetDept) return [];
+  } else {
+    // No concern selected — show nothing
+    return [];
   }
 
-return employees.map(e => {
-    const staffName = ((e.firstName||'')+ ' '+(e.lastName||'')).trim();
+  return employees.map(e => {
+    const staffName = ((e.firstName || '') + ' ' + (e.lastName || '')).trim();
     const takenSlots = allAppts
-      .filter(a=>a['Date']===selectedDate&&a['Specific Person']===staffName&&a['Status']!=='Cancelled')
-      .map(a=>a['Time']);
+      .filter(a => a['Date'] === selectedDate && a['Specific Person'] === staffName && a['Status'] !== 'Cancelled')
+      .map(a => a['Time']);
     return {
       name: staffName,
-      role: e.dept||'Employee',
+      role: e.dept || 'Employee',
       avail: true,
-      slots: TIME_SLOTS.filter(t=>!takenSlots.includes(t)),
+      slots: TIME_SLOTS.filter(t => !takenSlots.includes(t)),
     };
   });
-} 
+}
 
 // ═══════════════════════════════════════════════════════
 // CALENDAR ENGINE
