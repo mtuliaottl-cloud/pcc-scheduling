@@ -1587,7 +1587,7 @@ const employees = isFullAdmin
 document.getElementById('kpi-appt').textContent    = allAppts.length;
 document.getElementById('kpi-pending').textContent = pending.length;
 document.getElementById('kpi-today').textContent   = todayApts.length;  document.getElementById('admin-appt-badge').textContent = allAppts.length + ' total';
-  document.getElementById('admin-user-badge').textContent = allUsers.length + ' users';
+  document.getElementById('admin-user-badge').textContent = visibleUsers.length + ' users';
 
   const apptBody = document.getElementById('admin-appt-body');
   apptBody.innerHTML = visibleAppts.length
@@ -1613,8 +1613,13 @@ document.getElementById('kpi-today').textContent   = todayApts.length;  document
     : '<tr><td colspan="7" class="empty">No appointments yet</td></tr>';
 
   const userBody = document.getElementById('admin-user-body');
-  userBody.innerHTML = allUsers.length
-    ? allUsers.map(u => {
+const visibleUsers = isFullAdmin 
+  ? allUsers 
+  : allUsers.filter(u => 
+      u.role === 'employee' && (u.dept || '').trim() === adminDept
+    );
+userBody.innerHTML = visibleUsers.length
+    ? visibleUsers.map(u => {
         const rc = ROLE_COLOR[u.role]||'blue';
         return `<tr>
           <td style="font-weight:700;font-family:var(--font-head)">${u.firstName} ${u.lastName}</td>
