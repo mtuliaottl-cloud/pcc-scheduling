@@ -455,6 +455,7 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
       <option>Finance Office</option>
       <option>Academic Affairs</option>
       <option>Human Resources</option>
+      <option>Registrar</option>
     </select>
   </div>
   <div style="margin-bottom:8px">
@@ -944,7 +945,7 @@ function getTimeAgo(date) {
 
 const CONCERN_DEPT = {
   'General inquiry':   'Admin Office',
-  'Documentation':     'Admin Office',
+  'Registrar':         'Registrar',
   'Financial':         'Finance Office',
   'Academic':          'Academic Affairs',
   'Technical support': 'IT Department',
@@ -1089,11 +1090,12 @@ async function doLogin() {
 
 function getDeptColor(dept) {
   const map = {
-    'IT Department':    {bg:'var(--blue-bg)',  t:'var(--blue-t)'},
-    'Finance Office':   {bg:'var(--green-bg)', t:'var(--green-t)'},
-    'Academic Affairs': {bg:'var(--purple-bg)',t:'var(--purple-t)'},
-    'Admin Office':     {bg:'var(--amber-bg)', t:'var(--amber-t)'},
-    'Human Resources':  {bg:'var(--teal-bg)',  t:'var(--teal-t)'},
+    'IT Department':    {bg:'var(--blue-bg)',   t:'var(--blue-t)'},
+    'Finance Office':   {bg:'var(--green-bg)',  t:'var(--green-t)'},
+    'Academic Affairs': {bg:'var(--purple-bg)', t:'var(--purple-t)'},
+    'Admin Office':     {bg:'var(--amber-bg)',  t:'var(--amber-t)'},
+    'Human Resources':  {bg:'var(--teal-bg)',   t:'var(--teal-t)'},
+    'Registrar':        {bg:'rgba(232,64,64,.08)', t:'var(--red-t)'},
   };
   return map[dept] || {bg:'var(--bg2)', t:'var(--text2)'};
 }
@@ -1806,6 +1808,16 @@ function renderEmployeeView() {
   const greet=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
 
   document.getElementById('emp-greeting').textContent=`${greet}, ${currentUser.firstName} 👋`;
+  const empDateLbl = document.getElementById('emp-date-lbl');
+if(empDateLbl && currentUser.dept) {
+  empDateLbl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px">
+    <span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;
+                 font-family:var(--font-head);background:${getDeptColor(currentUser.dept).bg};
+                 color:${getDeptColor(currentUser.dept).t}">${currentUser.dept}</span>
+    · ${new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}
+  </span>`;
+}
+
   const bigAvatar=document.getElementById('emp-avatar-big');
   if(bigAvatar) bigAvatar.textContent=initials;
   const fnEl=document.getElementById('emp-full-name');
