@@ -1599,10 +1599,9 @@ const employees = isFullAdmin
   const todayApts = visibleAppts.filter(a=>a['Date']===todayStr);
 
   document.getElementById('kpi-emp').textContent     = employees.length;
- document.getElementById('kpi-appt').textContent = allAppts.length;
+document.getElementById('kpi-appt').textContent    = allAppts.length;
 document.getElementById('kpi-pending').textContent = pending.length;
-document.getElementById('kpi-today').textContent   = todayApts.length;h;
-  document.getElementById('admin-appt-badge').textContent = allAppts.length + ' total';
+document.getElementById('kpi-today').textContent   = todayApts.length;  document.getElementById('admin-appt-badge').textContent = allAppts.length + ' total';
   document.getElementById('admin-user-badge').textContent = allUsers.length + ' users';
 
   const apptBody = document.getElementById('admin-appt-body');
