@@ -1547,9 +1547,10 @@ if (currentUser?.role==='employee') {
   }
 }
 
-  } catch (e) {
-    document.getElementById('rt-sync').textContent = 'Sync failed · retrying…';
-  }
+ } catch (e) {
+  document.getElementById('rt-sync').textContent = 'Sync failed · retrying…';
+  setTimeout(loadData, 5000); // retry after 5 seconds
+}
 }
 
 // ═══════════════════════════════════════════════════════
