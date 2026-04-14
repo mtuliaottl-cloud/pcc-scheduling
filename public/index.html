@@ -1584,8 +1584,10 @@ function renderAdminView() {
   const adminDept = (currentUser.dept || '').trim();
 const isFullAdmin = !adminDept || adminDept === '—' || adminDept === 'Admin Office';
 
-// All admins see all appointments
-const visibleAppts = allAppts;
+// Filter appointments by admin's department
+const visibleAppts = isFullAdmin 
+  ? allAppts 
+  : allAppts.filter(a => CONCERN_DEPT[a['Concern']] === adminDept);
 
 // Employees panel filtered by admin's dept
 const employees = isFullAdmin
@@ -1597,9 +1599,9 @@ const employees = isFullAdmin
   const todayApts = visibleAppts.filter(a=>a['Date']===todayStr);
 
   document.getElementById('kpi-emp').textContent     = employees.length;
-  document.getElementById('kpi-appt').textContent    = allAppts.length;
-  document.getElementById('kpi-pending').textContent = pending.length;
-  document.getElementById('kpi-today').textContent   = todayApts.length;
+ document.getElementById('kpi-appt').textContent    = visibleAppts.length;
+document.getElementById('kpi-pending').textContent = pending.length;
+document.getElementById('kpi-today').textContent   = todayApts.length;h;
   document.getElementById('admin-appt-badge').textContent = allAppts.length + ' total';
   document.getElementById('admin-user-badge').textContent = allUsers.length + ' users';
 
