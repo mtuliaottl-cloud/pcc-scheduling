@@ -1616,7 +1616,8 @@ document.getElementById('kpi-today').textContent   = todayApts.length;  document
 const visibleUsers = isFullAdmin 
   ? allUsers 
   : allUsers.filter(u => 
-      u.role === 'employee' && (u.dept || '').trim() === adminDept
+      (u.role === 'employee' && (u.dept || '').trim() === adminDept) ||
+      (u.role === 'admin' && (u.dept || '').trim() === adminDept)
     );
 userBody.innerHTML = visibleUsers.length
     ? visibleUsers.map(u => {
