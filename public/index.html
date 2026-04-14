@@ -1107,6 +1107,7 @@ function getDeptIcon(dept) {
     'Academic Affairs': '📚',
     'Admin Office':     '🏢',
     'Human Resources':  '👥',
+    'Registrar':  '👥',
   };
   return icons[dept] || '👤';
 }
@@ -1589,9 +1590,7 @@ function renderAdminView() {
     return apptDept === adminDept || a['Specific Person'] === (currentUser.firstName+' '+currentUser.lastName).trim();
   });
 
-  const employees = isFullAdmin
-    ? allUsers.filter(u=>u.role==='employee')
-    : allUsers.filter(u=>u.role==='employee' && u.dept===adminDept);
+const employees = allUsers.filter(u => u.role === 'employee');
 
   const todayStr  = new Date().toISOString().slice(0,10);
   const pending   = visibleAppts.filter(a=>a['Status']==='Pending');
@@ -2163,28 +2162,25 @@ const TIME_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM
 // REPLACE this function in your HTML:
 
 function getStaffAvailForDay(dayName, concernType) {
-  let employees = allUsers.filter(u => u.role === 'employee');
+  if (!concernType) return [];
 
-  // STRICT department filter — always filter if concernType is set
-  if (concernType) {
-    const targetDept = CONCERN_DEPT[concernType] || null;
-    if (targetDept) {
-      employees = employees.filter(e => {
-        const empDept = (e.dept || '').trim();
-        return empDept === targetDept;
-      });
-    }
-    // If no targetDept mapping exists, show no one (unknown concern)
-    if (!targetDept) return [];
-  } else {
-    // No concern selected — show nothing
-    return [];
-  }
+  const targetDept = CONCERN_DEPT[concernType];
+  if (!targetDept) return [];
+
+  // STRICT: only employees whose dept exactly matches
+  const employees = allUsers.filter(u =>
+    u.role === 'employee' &&
+    (u.dept || '').trim() === targetDept.trim()
+  );
 
   return employees.map(e => {
     const staffName = ((e.firstName || '') + ' ' + (e.lastName || '')).trim();
     const takenSlots = allAppts
-      .filter(a => a['Date'] === selectedDate && a['Specific Person'] === staffName && a['Status'] !== 'Cancelled')
+      .filter(a =>
+        a['Date'] === selectedDate &&
+        a['Specific Person'] === staffName &&
+        a['Status'] !== 'Cancelled'
+      )
       .map(a => a['Time']);
     return {
       name: staffName,
