@@ -669,7 +669,7 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
 
 <div class="card" style="margin-bottom:16px">
   <div class="sec-header">
-    <div class="sec-title">Staff availability</div>
+    <div class="sec-title">Faculty availability</div>
             <span style="font-size:11px;color:var(--text2)" id="selected-date-label">Select a date above</span>
           </div>
      <div id="staff-avail-grid" style="display:flex;flex-direction:column;gap:6px">
@@ -1261,10 +1261,10 @@ function onConcernChange() {
       <div style="grid-column:1/-1;text-align:center;padding:32px 16px">
         <div style="font-size:36px;margin-bottom:10px">😔</div>
         <div style="font-family:var(--font-head);font-weight:800;font-size:14px;color:var(--text);margin-bottom:6px">
-          No staff available
+          No faculty available
         </div>
         <div style="font-size:12px;color:var(--text2)">
-          No staff found for <strong>${concern}</strong> on this date. Try a different date or concern.
+          No faculty found for <strong>${concern}</strong> on this date. Try a different date or concern.
         </div>
       </div>`;
     return;
@@ -2150,7 +2150,7 @@ if(!subConcern)  return toast('Please select a specific concern.','amber');
 }
 
 // ═══════════════════════════════════════════════════════
-// STAFF AVAILABILITY
+// Faculty AVAILABILITY
 // FIX: pulls from allUsers (loaded from Google Sheets)
 //      Falls back to showing current user if no employees exist yet
 // ═══════════════════════════════════════════════════════
@@ -2296,7 +2296,7 @@ function selectStudentDate(y,m,d){
   const dateStr=MONTHS_L[m]+' '+d+', '+y;
 
   document.getElementById('modal-date-title').textContent=dateStr+' ('+dayName+')';
-  document.getElementById('modal-date-sub').textContent='Staff availability for this day';
+  document.getElementById('modal-date-sub').textContent='faculty availability for this day';
 
   const concern = document.getElementById('concern-type-early')?.value || '';
   const staffData=getStaffAvailForDay(dayName, concern);
@@ -2450,7 +2450,7 @@ function closeModalAndSelect(){
   }).join('')
   : `<div style="grid-column:1/-1;text-align:center;padding:32px 16px">
       <div style="font-size:36px;margin-bottom:10px">😔</div>
-      <div style="font-family:var(--font-head);font-weight:800;font-size:14px;color:var(--text);margin-bottom:6px">No staff available</div>
+      <div style="font-family:var(--font-head);font-weight:800;font-size:14px;color:var(--text);margin-bottom:6px">No faculty available</div>
       <div style="font-size:12px;color:var(--text2)">No staff found for <strong>${concern}</strong> on this date.</div>
     </div>`;
 
