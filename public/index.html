@@ -530,12 +530,24 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
           </div>
         </div>
         <div class="card" style="margin-bottom:16px">
-          <div class="sec-header">
-            <div class="sec-title">My upcoming appointments</div>
-            <span class="badge badge-green" style="font-size:10px">Live</span>
-          </div>
-          <div id="emp-my-appts"></div>
-        </div>
+  <div class="sec-header" onclick="toggleEmpAppts()" 
+       style="cursor:pointer;user-select:none">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="sec-title">My upcoming appointments</div>
+      <span class="badge badge-green" style="font-size:10px">Live</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="emp-appt-count-badge" 
+            style="font-size:11px;color:var(--text2);font-weight:700"></span>
+      <span id="emp-appts-chevron" 
+            style="font-size:16px;color:var(--text3);transition:transform .25s">▾</span>
+    </div>
+  </div>
+  <div id="emp-appts-body" style="overflow:hidden;
+       max-height:0;transition:max-height .35s ease,opacity .25s ease;opacity:0">
+    <div id="emp-my-appts" style="padding-top:8px"></div>
+  </div>
+</div>
         <div class="card" style="margin-bottom:16px">
           <div class="cal-nav">
             <button class="btn-icon" onclick="prevMonth()">‹</button>
@@ -996,12 +1008,18 @@ const CONCERN_DEPT = {
   'Medical':           'Admin Office',
   'Other':             'Admin Office',
 };
+
+
 let currentUser  = null;
 let allAppts     = [];
 let allUsers     = [];
 let refreshTimer = null;
 let selectedDate = null, selectedStaffObj = null, selectedTime = null;
 let leaveRequests = {};
+let blockedDates = [];
+let _blockingDate = null;
+
+
 
 // ═══════════════════════════════════════════════════════
 // API HELPERS
@@ -1896,6 +1914,21 @@ if(empDateLbl && currentUser.dept) {
   if(tcEl) tcEl.textContent=myToday.length;
 
   const empAppts=document.getElementById('emp-my-appts');
+  // Update dropdown count badge
+const countBadge = document.getElementById('emp-appt-count-badge');
+if (countBadge) countBadge.textContent = myAppts.length + ' total';
+
+// Auto-expand if there are appointments
+if (myAppts.length > 0) {
+  const body    = document.getElementById('emp-appts-body');
+  const chevron = document.getElementById('emp-appts-chevron');
+  if (body) {
+    body.style.maxHeight = '600px';
+    body.style.opacity   = '1';
+  }
+  if (chevron) chevron.style.transform = 'rotate(180deg)';
+}
+  
   if(empAppts) empAppts.innerHTML=myAppts.length
     ?myAppts.slice().sort((a,b)=>a['Date'].localeCompare(b['Date'])).map(a=>{
         const sc={Confirmed:'badge-green',Pending:'badge-amber',Cancelled:'badge-red',Completed:'badge-blue'}[a['Status']]||'badge-amber';
@@ -2735,11 +2768,6 @@ function toast(msg,type='green'){
 renderCalendar('emp-calendar-grid','emp-calendar-head','emp-cal-title',empYear,empMonth,'emp');
 renderStudentCalendar();
 
-// ═══════════════════════════════════════════════════════
-// ADMIN BLOCK DATE FEATURE
-// ═══════════════════════════════════════════════════════
-let blockedDates = []; // { id, date, dept, reason, blockedBy, blockedAt }
-let _blockingDate = null;
 
 async function loadBlockedDates() {
   try {
@@ -2867,6 +2895,23 @@ async function unblockDate() {
     toast('Network error.', 'red');
   }
 }
+
+
+function toggleEmpAppts() {
+  const body     = document.getElementById('emp-appts-body');
+  const chevron  = document.getElementById('emp-appts-chevron');
+  const isOpen   = body.style.maxHeight !== '0px' && body.style.maxHeight !== '';
+  if (isOpen) {
+    body.style.maxHeight = '0';
+    body.style.opacity   = '0';
+    chevron.style.transform = 'rotate(0deg)';
+  } else {
+    body.style.maxHeight = body.scrollHeight + 500 + 'px';
+    body.style.opacity   = '1';
+    chevron.style.transform = 'rotate(180deg)';
+  }
+}
+
 
 </script>
 </body>
