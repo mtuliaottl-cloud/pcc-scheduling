@@ -595,15 +595,23 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
             <div class="sec-title">Request center</div>
             <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue)" onclick="toggleLeaveForm()">+ New</button>
           </div>
-          <div id="leave-form" style="display:none;margin-bottom:12px;padding:12px;background:var(--bg2);border-radius:var(--r)">
+          <div id="leave-form" style="display:none;margin-bottom:12px;padding:12px;background:var(--bg2);border-radius:var(--r);overflow:hidden;width:100%;box-sizing:border-box">
             <div style="margin-bottom:8px">
               <div class="card-label" style="margin-bottom:4px">Request type</div>
               <select class="field" id="leave-type" style="font-size:12px"><option>PTO — Paid time off</option><option>Sick leave</option><option>Emergency leave</option></select>
             </div>
-            <div class="grid-2" style="margin-bottom:8px;gap:8px">
-              <div><div class="card-label" style="margin-bottom:4px">From</div><input type="date" class="field" id="leave-from" style="font-size:12px"></div>
-              <div><div class="card-label" style="margin-bottom:4px">To</div><input type="date" class="field" id="leave-to" style="font-size:12px"></div>
-            </div>
+         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
+  <div>
+    <div class="card-label" style="margin-bottom:4px">From</div>
+    <input type="date" class="field" id="leave-from" 
+           style="font-size:12px;width:100%;min-width:0;box-sizing:border-box">
+  </div>
+  <div>
+    <div class="card-label" style="margin-bottom:4px">To</div>
+    <input type="date" class="field" id="leave-to" 
+           style="font-size:12px;width:100%;min-width:0;box-sizing:border-box">
+  </div>
+</div>
             <div style="margin-bottom:8px">
               <div class="card-label" style="margin-bottom:4px">Notes</div>
               <textarea class="field" id="leave-notes" rows="2" style="font-size:12px" placeholder="Optional reason..."></textarea>
