@@ -803,7 +803,6 @@ const API = {
   auth:         '/api/auth',
   appointments: '/api/appointments',
   users:        '/api/users',
-   blockedDates:  '/api/blocked-dates', 
 };
 // ═══════════════════════════════════════════════════════
 // NOTIFICATION SYSTEM
@@ -1522,7 +1521,6 @@ async function loadData() {
     const [apptRes, userRes] = await Promise.all([
       apiGet(API.appointments),
       apiGet(API.users),
-      apiGet(API.blockedDates),   
     ]);
     if (apptRes.status==='ok') allAppts = apptRes.data || [];
     if (userRes.status==='ok') allUsers = userRes.data || [];
@@ -1531,7 +1529,6 @@ async function loadData() {
         if (currentUser?.role === 'admin' && newPending.length > 0) {
           if (!window._lastPendingCount) window._lastPendingCount = 0;
           if (newPending.length > window._lastPendingCount) {
-          if (blockedRes.status === 'ok') blockedDates = blockedRes.data || [];
             addNotif(`${newPending.length - window._lastPendingCount} new appointment(s) pending approval`, 'booking');
           }
           window._lastPendingCount = newPending.length;
@@ -2154,57 +2151,6 @@ if(!subConcern)  return toast('Please select a specific concern.','amber');
   }
 }
 
-
-async function addBlockedDate() {
-  const date      = document.getElementById('block-date-input').value;
-  const dept      = document.getElementById('block-dept-input').value;
-  const reason    = document.getElementById('block-reason-input').value.trim();
-  const blockedBy = (currentUser.firstName + ' ' + currentUser.lastName).trim();
-
-  if (!date) return toast('Please select a date.', 'amber');
-
-  const exists = blockedDates.find(b => b.date === date && b.dept === dept);
-  if (exists)  return toast('Already blocked for that department.', 'amber');
-
-  try {
-    const res = await apiPost(API.blockedDates, {
-      action: 'block', date, dept,
-      reason: reason || 'No reason given', blockedBy,
-    });
-    if (res.status === 'ok') {
-      // Optimistically add to local state
-      blockedDates.push({
-        id: res.id, date, dept,
-        reason: reason || 'No reason given',
-        blockedBy, blockedAt: new Date().toISOString(),
-      });
-      toast(`${date} blocked for ${dept}!`, 'red');
-      toggleBlockDateForm();
-      renderBlockedDatesList();
-      renderStudentCalendar();
-    }
-  } catch(e) {
-    toast('Network error. Please retry.', 'red');
-  }
-}
-
-async function removeBlockedDate(id) {
-  const b = blockedDates.find(x => x.id === id);
-  if (!b || !confirm(`Unblock ${b.date} for ${b.dept}?`)) return;
-
-  try {
-    const res = await apiPost(API.blockedDates, { action: 'unblock', id });
-    if (res.status === 'ok') {
-      blockedDates = blockedDates.filter(x => x.id !== id);
-      toast('Date unblocked.', 'green');
-      renderBlockedDatesList();
-      renderStudentCalendar();
-    }
-  } catch(e) {
-    toast('Network error. Please retry.', 'red');
-  }
-}
-
 // ═══════════════════════════════════════════════════════
 // Faculty AVAILABILITY
 // FIX: pulls from allUsers (loaded from Google Sheets)
@@ -2301,46 +2247,6 @@ function isWorkDay(y,m,d) {
   const holiday = getHoliday(y, m, d);
   return !holiday; // Holidays are non-working
 }
-
-
-
-function renderBlockedDatesList() {
-  const el = document.getElementById('blocked-dates-list');
-  if (!el) return;
-  if (!blockedDates.length) {
-    el.innerHTML = '<div class="empty">No dates blocked yet</div>';
-    return;
-  }
-  el.innerHTML = blockedDates
-    .slice().sort((a,b) => a.date.localeCompare(b.date))
-    .map(b => {
-      const d = new Date(b.date + 'T00:00:00');
-      const label = d.toLocaleDateString('en-PH',
-        {weekday:'short', month:'short', day:'numeric', year:'numeric'});
-      return `
-        <div style="display:flex;align-items:center;gap:10px;padding:9px 0;
-                    border-bottom:1px solid var(--border)">
-          <div style="width:32px;height:32px;border-radius:8px;background:var(--red-bg);
-                      display:flex;align-items:center;justify-content:center;
-                      font-size:14px;flex-shrink:0">🚫</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:800;font-family:var(--font-head);font-size:12px">
-              ${label}
-            </div>
-            <div style="font-size:11px;color:var(--text2)">
-              ${b.dept} · ${b.reason}
-            </div>
-            <div style="font-size:10px;color:var(--text3)">
-              Blocked by ${b.blockedBy || 'Admin'}
-            </div>
-          </div>
-          <button class="btn btn-sm btn-act-green"
-                  onclick="removeBlockedDate('${b.id}')">Unblock</button>
-        </div>`;
-    }).join('');
-}
-
-
 
 function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
   const titleEl=document.getElementById(titleId);
