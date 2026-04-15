@@ -1128,7 +1128,7 @@ async function doLogin() {
     if (res.status === 'ok') {
      currentUser = res.user;
 saveSession(currentUser);
-await loadBlockedDates(); // ADD THIS
+try { await loadBlockedDates(); } catch(e) { blockedDates = []; }
 launchApp();
     } else {
       showError(res.message || 'Invalid email or password.');
@@ -1928,7 +1928,7 @@ if (myAppts.length > 0) {
   }
   if (chevron) chevron.style.transform = 'rotate(180deg)';
 }
-  
+
   if(empAppts) empAppts.innerHTML=myAppts.length
     ?myAppts.slice().sort((a,b)=>a['Date'].localeCompare(b['Date'])).map(a=>{
         const sc={Confirmed:'badge-green',Pending:'badge-amber',Cancelled:'badge-red',Completed:'badge-blue'}[a['Status']]||'badge-amber';
@@ -2758,7 +2758,7 @@ function toast(msg,type='green'){
   const saved = loadSession();
   if(saved && saved.id && saved.role && saved.email) {
     currentUser = saved;
-    await loadBlockedDates(); // ADD THIS
+    try { await loadBlockedDates(); } catch(e) { blockedDates = []; }
     launchApp();
     return;
   }
@@ -2773,7 +2773,7 @@ async function loadBlockedDates() {
   try {
     const r = await fetch('/api/blocked-dates');
     const res = await r.json();
-    if (res.status === 'ok') blockedDates = res.data || [];
+    blockedDates = (res.status === 'ok' ? res.data : null) || [];
   } catch(e) {
     console.warn('Could not load blocked dates:', e);
     blockedDates = [];
