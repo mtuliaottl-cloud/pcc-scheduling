@@ -2303,7 +2303,17 @@ function selectStudentDate(y,m,d){
   const available=staffData.filter(s=>s.avail);
   const absent=staffData.filter(s=>!s.avail);
 
-  document.getElementById('modal-available').innerHTML = `
+
+document.getElementById('modal-available').innerHTML = !concern ? `
+  <div style="text-align:center;padding:20px 0">
+    <div style="font-size:40px;margin-bottom:10px">⚠️</div>
+    <div style="font-family:var(--font-head);font-weight:900;font-size:16px;color:var(--amber-t);margin-bottom:6px">
+      Please select your nature of concern first!
+    </div>
+    <div style="font-size:12px;color:var(--text2)">
+      Please pick your nature of concern before clicking the date. Thank you!
+    </div>
+  </div>` : `
   <div style="text-align:center;padding:20px 0">
     <div style="font-size:40px;margin-bottom:10px">📅</div>
     <div style="font-family:var(--font-head);font-weight:900;font-size:16px;color:var(--text);margin-bottom:6px">
@@ -2313,13 +2323,21 @@ function selectStudentDate(y,m,d){
       ${available.length} staff member${available.length !== 1 ? 's' : ''} ready to assist you
     </div>
     <div style="font-size:11px;color:var(--text3)">
-      Select your concern below to see who can help you
+      Staff members shown after concern is selected
     </div>
   </div>`;
 
-// Disable book button if all staff fully booked
-const allFull = available.every(s => s.slots.length === 0);
+const allFull = concern && available.every(s => s.slots.length === 0);
 const bookBtn = document.getElementById('modal-book-btn');
+if(bookBtn) {
+  const noConcern = !concern;
+  bookBtn.disabled = allFull || noConcern;
+  bookBtn.textContent = noConcern ? '⚠️ Select a concern first' : allFull ? '⛔ All slots fully booked on this day' : 'Book on this date →';
+  bookBtn.style.background = (allFull || noConcern) ? 'var(--text3)' : '';
+  bookBtn.style.boxShadow = (allFull || noConcern) ? 'none' : '';
+  bookBtn.style.cursor = (allFull || noConcern) ? 'not-allowed' : '';
+}
+
 if(bookBtn) {
   bookBtn.disabled = allFull;
   bookBtn.textContent = allFull ? '⛔ All slots fully booked on this day' : 'Book on this date →';
