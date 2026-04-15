@@ -1,6 +1,4 @@
-// api/auth.js  — Vercel Serverless Function
-// POST { action:"login",    email, password }
-// POST { action:"register", firstName, lastName, email, password, role, sid, dept }
+
 
 import { google } from 'googleapis';
 
