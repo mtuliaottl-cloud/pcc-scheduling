@@ -646,7 +646,9 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
           <div style="display:flex;gap:14px;font-size:11px;color:var(--text2)">
             <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px"></span>Available</span>
             <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--border2);margin-right:4px"></span>Unavailable (Fri–Sun)</span>
-            <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:4px"></span>Fully booked</span>
+          <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e74c3c;margin-right:4px"></span>Regular Holiday</span>
+          <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f39c12;margin-right:4px"></span>Special Holiday</span>
+          <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:4px"></span>Fully booked</span>
           </div>
         </div>
        <div class="card" style="margin-bottom:16px">
@@ -2200,9 +2202,50 @@ const todayD   = new Date();
 let empYear=todayD.getFullYear(), empMonth=todayD.getMonth();
 let stuYear=todayD.getFullYear(), stuMonth=todayD.getMonth();
 
+const PH_HOLIDAYS = {
+  // Regular Holidays
+  '01-01': { name: 'New Year\'s Day', type: 'regular' },
+  '04-09': { name: 'Araw ng Kagitingan', type: 'regular' },
+  '05-01': { name: 'Labor Day', type: 'regular' },
+  '06-12': { name: 'Independence Day', type: 'regular' },
+  '08-25': { name: 'National Heroes Day', type: 'regular' },
+  '11-30': { name: 'Bonifacio Day', type: 'regular' },
+  '12-25': { name: 'Christmas Day', type: 'regular' },
+  '12-30': { name: 'Rizal Day', type: 'regular' },
+  // Special Non-Working Holidays
+  '02-25': { name: 'EDSA Revolution', type: 'special' },
+  '08-21': { name: 'Ninoy Aquino Day', type: 'special' },
+  '11-01': { name: 'All Saints Day', type: 'special' },
+  '11-02': { name: 'All Souls Day', type: 'special' },
+  '12-08': { name: 'Feast of Immaculate Conception', type: 'special' },
+  '12-24': { name: 'Christmas Eve', type: 'special' },
+  '12-31': { name: 'New Year\'s Eve', type: 'special' },
+};
+
+// Movable holidays for 2025-2026 (update yearly)
+const PH_MOVABLE = {
+  '2025-04-17': { name: 'Maundy Thursday', type: 'regular' },
+  '2025-04-18': { name: 'Good Friday', type: 'regular' },
+  '2025-04-19': { name: 'Black Saturday', type: 'special' },
+  '2025-10-29': { name: 'Eid al-Adha', type: 'regular' },
+  '2026-04-02': { name: 'Maundy Thursday', type: 'regular' },
+  '2026-04-03': { name: 'Good Friday', type: 'regular' },
+  '2026-04-04': { name: 'Black Saturday', type: 'special' },
+  '2026-03-20': { name: 'Eid\'l Fitr', type: 'regular' },
+  '2026-05-27': { name: 'Eid al-Adha', type: 'regular' },
+};
+
+function getHoliday(y, m, d) {
+  const fullStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+  const mmdd    = String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+  return PH_MOVABLE[fullStr] || PH_HOLIDAYS[mmdd] || null;
+}
+
 function isWorkDay(y,m,d) {
-  const dow=new Date(y,m,d).getDay();
-  return dow>=1&&dow<=4;
+  const dow = new Date(y,m,d).getDay();
+  if (dow < 1 || dow > 4) return false; // Only Mon–Thu
+  const holiday = getHoliday(y, m, d);
+  return !holiday; // Holidays are non-working
 }
 
 function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
@@ -2239,8 +2282,15 @@ const onclick = type==='student'&&clickable
 
     let bg='',color='',border='',label='',cursor='default';
 
+const holiday = getHoliday(year, month, d);
 if(!work||isPast&&type==='student'){
-      bg='#f0f0f5'; color='#bbb'; border='1px solid #e8e8f0';
+  bg='#f0f0f5'; color='#bbb'; border='1px solid #e8e8f0';
+  if(holiday) {
+    bg = holiday.type === 'regular' ? '#ffe4e4' : '#fff3e0';
+    color = holiday.type === 'regular' ? '#c0392b' : '#e67e22';
+    border = holiday.type === 'regular' ? '1.5px solid #e74c3c' : '1.5px solid #f39c12';
+    label = `<div style="font-size:8px;font-weight:800;margin-top:1px;font-family:var(--font-head);line-height:1.1;text-align:center;padding:0 2px">${holiday.name.split(' ').slice(0,2).join(' ')}</div>`;
+  }
     } else if(fullBook){
       bg='#fff3cd'; color='#856404'; border='2px solid #ffc107';
       label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">FULL</div>';
