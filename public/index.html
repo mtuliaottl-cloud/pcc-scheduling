@@ -795,6 +795,55 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
   </div>
 </div>
 
+<!-- ADMIN BLOCK DATE MODAL -->
+<div id="block-date-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(5px);align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:26px;width:460px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.2);animation:authIn .3s ease both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div>
+        <div style="font-family:var(--font-head);font-weight:900;font-size:16px" id="block-modal-title">Block Date</div>
+        <div style="font-size:11px;color:var(--text2)" id="block-modal-sub">Mark all faculty as unavailable</div>
+      </div>
+      <button onclick="closeBlockModal()" style="width:28px;height:28px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+
+    <!-- Current blocked status -->
+    <div id="block-modal-status" style="margin-bottom:14px"></div>
+
+    <!-- Block form -->
+    <div id="block-form-section">
+      <div style="background:var(--amber-bg);border:1px solid rgba(230,168,23,.25);border-radius:var(--r);padding:12px;margin-bottom:14px;font-size:12px;color:var(--amber-t)">
+        <strong>⚠️ Admin action:</strong> Blocking this date will mark all faculty in your department as unavailable. Students will not be able to book on this day.
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="card-label" style="margin-bottom:5px">Reason / Description</div>
+        <textarea class="field" id="block-reason" rows="3" style="font-size:12px" placeholder="e.g. Department meeting, Faculty training, Holiday event…"></textarea>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="card-label" style="margin-bottom:5px">Applies to</div>
+        <div id="block-dept-display" style="font-size:12px;font-weight:700;padding:9px 12px;background:var(--bg2);border-radius:var(--r);border:1.5px solid var(--border)"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" id="block-confirm-btn" style="border-radius:var(--r)" onclick="confirmBlockDate()">🚫 Block this date</button>
+        <button class="btn btn-sm" onclick="closeBlockModal()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Unblock section (shown if already blocked) -->
+    <div id="unblock-section" style="display:none">
+      <div style="background:var(--red-bg);border:1px solid rgba(232,64,64,.2);border-radius:var(--r);padding:12px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:800;color:var(--red-t);margin-bottom:4px">🚫 This date is currently blocked</div>
+        <div style="font-size:11px;color:var(--text2)" id="block-existing-reason"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px" id="block-existing-by"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm" style="background:var(--green-bg);color:var(--green-t);border-color:rgba(29,158,117,.2);flex:1" onclick="unblockDate()">✅ Unblock this date</button>
+        <button class="btn btn-sm" onclick="closeBlockModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
 // ═══════════════════════════════════════════════════════
 // CONFIG
@@ -1059,9 +1108,10 @@ async function doLogin() {
   try {
     const res = await apiPost(API.auth, { action:'login', email, password });
     if (res.status === 'ok') {
-      currentUser = res.user; // full user object from server
-      saveSession(currentUser);
-      launchApp();
+     currentUser = res.user;
+saveSession(currentUser);
+await loadBlockedDates(); // ADD THIS
+launchApp();
     } else {
       showError(res.message || 'Invalid email or password.');
     }
@@ -2275,7 +2325,9 @@ const fullBook=type==='student'&&work&&bookedDays.includes(d);
 const clickable=work&&!fullBook&&type==='student'&&!isPast;
     const dateStrCheck=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
 const onclick = type==='student'&&clickable
-  ? `onclick="selectStudentDate(${year},${month},${d})"`
+  ? (currentUser?.role==='admin'
+      ? `onclick="openAdminBlockModal(${year},${month},${d})"`
+      : `onclick="selectStudentDate(${year},${month},${d})"`)
   : type==='emp'&&isWorkDay(year,month,d)&&markedAppts.some(a=>a['Date']===dateStrCheck)
   ? `onclick="showEmpDayModal('${dateStrCheck}')"`
   : '';
@@ -2295,10 +2347,15 @@ if(!work||isPast&&type==='student'){
       bg='#fff3cd'; color='#856404'; border='2px solid #ffc107';
       label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">FULL</div>';
       cursor='not-allowed';
- } else if(type==='emp'){
-  const dateStr=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-  const hasAppt=markedAppts.some(a=>a['Date']===dateStr);
-  if(hasAppt){
+    } else if(type==='student' && isDateBlocked(dateStrCheck)){
+      bg='#f3e8ff'; color='#7c3aed'; border='2px solid #a855f7';
+      label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">BLOCKED</div>';
+      cursor = currentUser?.role==='admin' ? 'pointer' : 'not-allowed';
+    } else if(type==='emp'){
+      const dateStr=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const hasAppt=markedAppts.some(a=>a['Date']===dateStr);
+      if(hasAppt){
+
     bg='#d4f5e9'; color='#0d6e4f'; border='2px solid #1D9E75';
     label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">APPT</div>';
     cursor='pointer';
@@ -2668,7 +2725,8 @@ function toast(msg,type='green'){
   const saved = loadSession();
   if(saved && saved.id && saved.role && saved.email) {
     currentUser = saved;
-    launchApp(); // this already calls loadData() which fetches appointments
+    await loadBlockedDates(); // ADD THIS
+    launchApp();
     return;
   }
 })();
@@ -2676,6 +2734,140 @@ function toast(msg,type='green'){
 // Initial calendar renders (shown before login completes)
 renderCalendar('emp-calendar-grid','emp-calendar-head','emp-cal-title',empYear,empMonth,'emp');
 renderStudentCalendar();
+
+// ═══════════════════════════════════════════════════════
+// ADMIN BLOCK DATE FEATURE
+// ═══════════════════════════════════════════════════════
+let blockedDates = []; // { id, date, dept, reason, blockedBy, blockedAt }
+let _blockingDate = null;
+
+async function loadBlockedDates() {
+  try {
+    const r = await fetch('/api/blocked-dates');
+    const res = await r.json();
+    if (res.status === 'ok') blockedDates = res.data || [];
+  } catch(e) {
+    console.warn('Could not load blocked dates:', e);
+    blockedDates = [];
+  }
+}
+
+function isDateBlocked(dateStr) {
+  if (!currentUser) return false;
+  const dept = (currentUser.dept || '').trim();
+  return blockedDates.some(b =>
+    b.date === dateStr &&
+    (b.dept === dept || b.dept === 'All' || !b.dept)
+  );
+}
+
+function getBlockedEntry(dateStr) {
+  const dept = (currentUser?.dept || '').trim();
+  return blockedDates.find(b =>
+    b.date === dateStr &&
+    (b.dept === dept || b.dept === 'All' || !b.dept)
+  );
+}
+
+function openAdminBlockModal(y, m, d) {
+  const dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+  _blockingDate = dateStr;
+
+  const label = MONTHS_L[m] + ' ' + d + ', ' + y;
+  document.getElementById('block-modal-title').textContent = 'Manage: ' + label;
+
+  const dept = currentUser.dept || 'All departments';
+  document.getElementById('block-dept-display').textContent = dept;
+
+  const existing = getBlockedEntry(dateStr);
+
+  const statusEl = document.getElementById('block-modal-status');
+  const blockForm = document.getElementById('block-form-section');
+  const unblockSec = document.getElementById('unblock-section');
+
+  if (existing) {
+    statusEl.innerHTML = '';
+    blockForm.style.display = 'none';
+    unblockSec.style.display = 'block';
+    document.getElementById('block-existing-reason').textContent = '📝 Reason: ' + (existing.reason || 'No reason given');
+    document.getElementById('block-existing-by').textContent = '👤 Blocked by: ' + (existing.blockedBy || 'Admin') + ' · ' + (existing.blockedAt || '').slice(0, 10);
+  } else {
+    statusEl.innerHTML = '';
+    blockForm.style.display = 'block';
+    unblockSec.style.display = 'none';
+    document.getElementById('block-reason').value = '';
+  }
+
+  document.getElementById('block-date-modal').style.display = 'flex';
+}
+
+function closeBlockModal() {
+  document.getElementById('block-date-modal').style.display = 'none';
+  _blockingDate = null;
+}
+
+async function confirmBlockDate() {
+  if (!_blockingDate) return;
+  const reason = document.getElementById('block-reason').value.trim();
+  if (!reason) return toast('Please enter a reason for blocking this date.', 'amber');
+
+  const btn = document.getElementById('block-confirm-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Blocking…';
+
+  try {
+    const res = await apiPost('/api/blocked-dates', {
+      action: 'block',
+      date: _blockingDate,
+      dept: currentUser.dept || 'All',
+      reason,
+      blockedBy: (currentUser.firstName + ' ' + currentUser.lastName).trim(),
+    });
+
+    if (res.status === 'ok') {
+      blockedDates.push({
+        id: res.id,
+        date: _blockingDate,
+        dept: currentUser.dept || 'All',
+        reason,
+        blockedBy: (currentUser.firstName + ' ' + currentUser.lastName).trim(),
+        blockedAt: new Date().toISOString(),
+      });
+      toast('Date blocked successfully! Students cannot book on this day.', 'green');
+      addNotif(`📅 ${_blockingDate} has been blocked for ${currentUser.dept || 'all departments'}`, 'warning');
+      closeBlockModal();
+      renderStudentCalendar(); // refresh calendar colors
+    } else {
+      toast('Failed to block date: ' + (res.message || 'Unknown error'), 'red');
+    }
+  } catch(e) {
+    toast('Network error. Please retry.', 'red');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🚫 Block this date';
+  }
+}
+
+async function unblockDate() {
+  if (!_blockingDate) return;
+  const existing = getBlockedEntry(_blockingDate);
+  if (!existing) return;
+
+  try {
+    const res = await apiPost('/api/blocked-dates', { action: 'unblock', id: existing.id });
+    if (res.status === 'ok') {
+      blockedDates = blockedDates.filter(b => b.id !== existing.id);
+      toast('Date unblocked. Students can now book again.', 'green');
+      closeBlockModal();
+      renderStudentCalendar();
+    } else {
+      toast('Failed to unblock.', 'red');
+    }
+  } catch(e) {
+    toast('Network error.', 'red');
+  }
+}
+
 </script>
 </body>
 </html>
