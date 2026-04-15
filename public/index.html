@@ -493,6 +493,16 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
             <div class="toggle on" onclick="this.classList.toggle('on')"></div>
           </div>
         </div>
+       <div class="card" style="margin-bottom:12px">
+          <div class="sec-header">
+            <div class="sec-title">Leave requests</div>
+            <span class="badge badge-amber" id="admin-leave-badge">0 pending</span>
+          </div>
+          <div id="admin-leave-list">
+            <div class="empty">Loading…</div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="sec-header">
             <div class="sec-title">Audit trail</div>
@@ -1620,7 +1630,8 @@ async function loadData() {
 if (currentUser?.role==='student') renderStudentAppts();
 if (currentUser?.role==='employee') {
   renderEmployeeView();
-  // Show welcome popup only ONCE per session
+  renderLeaveRequests(); 
+ 
   if (!window._welcomeShown) {
     window._welcomeShown = true;
     setTimeout(() => showEmpWelcomePopup(), 800);
@@ -1775,6 +1786,8 @@ try {
 
     renderAdminView();
   }
+  renderAdminLeaveRequests();
+
 } catch (e) {
   toast('Update failed. Please retry.', 'red');
 } finally {
@@ -1972,54 +1985,129 @@ function toggleLeaveForm() {
 })();
 
 
-function submitLeaveRequest() {
-  if(!currentUser) return;
+async function submitLeaveRequest() {
+  if (!currentUser) return;
   const type  = document.getElementById('leave-type').value;
   const from  = document.getElementById('leave-from').value;
   const to    = document.getElementById('leave-to').value;
   const notes = document.getElementById('leave-notes').value.trim();
 
-  if(!from||!to) return toast('Please select start and end dates.','amber');
-  if(from>to)    return toast('End date must be after start date.','amber');
+  if (!from || !to) return toast('Please select start and end dates.', 'amber');
+  if (from > to)    return toast('End date must be after start date.', 'amber');
 
-  const uid=currentUser.id;
-  if(!leaveRequests[uid]) leaveRequests[uid]=[];
-  leaveRequests[uid].push({type,from,to,notes,status:'Pending',submittedAt:new Date().toISOString()});
+  const submitBtn = document.querySelector('#leave-form .btn-primary');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<span class="spin"></span>Submitting…'; }
 
-  toast('Leave request submitted!','green');
-  toggleLeaveForm();
-  document.getElementById('leave-type').value='PTO — Paid time off';
-  document.getElementById('leave-from').value='';
-  document.getElementById('leave-to').value='';
-  document.getElementById('leave-notes').value='';
-  renderLeaveRequests();
+  try {
+    const res = await apiPost('/api/leave-requests', {
+      action:       'submit',
+      employeeId:   currentUser.id,
+      employeeName: (currentUser.firstName + ' ' + currentUser.lastName).trim(),
+      dept:         currentUser.dept || '—',
+      type,
+      from,
+      to,
+      notes,
+    });
+
+    if (res.status === 'ok') {
+      // Also keep in local cache so it shows immediately
+      const uid = currentUser.id;
+      if (!leaveRequests[uid]) leaveRequests[uid] = [];
+      leaveRequests[uid].push({
+        id: 'LR-' + Date.now(),
+        type, from, to, notes,
+        status: 'Pending',
+        submittedAt: new Date().toISOString(),
+      });
+
+      toast('Leave request submitted!', 'green');
+      addNotif('Your leave request has been submitted and is awaiting review.', 'info');
+      toggleLeaveForm();
+      document.getElementById('leave-type').value = 'PTO — Paid time off';
+      document.getElementById('leave-from').value = '';
+      document.getElementById('leave-to').value   = '';
+      document.getElementById('leave-notes').value = '';
+      renderLeaveRequests();
+    } else {
+      toast('Failed to submit: ' + (res.message || 'Unknown error'), 'red');
+    }
+  } catch (e) {
+    toast('Network error. Please retry.', 'red');
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
+  }
 }
 
-function renderLeaveRequests() {
-  if(!currentUser) return;
-  const uid=currentUser.id;
-  const requests=leaveRequests[uid]||[];
-  const el=document.getElementById('request-list');
-  if(!el) return;
-  if(!requests.length){el.innerHTML='<div class="empty">No requests submitted yet</div>';return;}
-  const scMap={Pending:'badge-amber',Approved:'badge-green',Declined:'badge-red'};
-  el.innerHTML=requests.slice().reverse().map((r,ri)=>{
-    const realIdx=requests.length-1-ri;
-    const dateRange=r.from===r.to?r.from:r.from+' → '+r.to;
-    const sc=scMap[r.status]||'badge-amber';
-    const canCancel=r.status==='Pending';
-    return `<div class="req-item">
-      <div class="req-icon" style="background:var(--green-bg)">🗓</div>
-      <div class="req-info">
-        <div class="req-title">${r.type}</div>
-        <div class="req-sub">${dateRange}${r.notes?' · '+r.notes:''}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+async function renderLeaveRequests() {
+  if (!currentUser) return;
+  const el = document.getElementById('request-list');
+  if (!el) return;
+
+  el.innerHTML = '<div class="empty" style="padding:16px 0"><span class="spin" style="border-color:rgba(0,0,0,.15);border-top-color:var(--blue)"></span> Loading…</div>';
+
+  try {
+    const res = await apiGet('/api/leave-requests');
+    if (res.status === 'ok') {
+      // Filter to only this employee's requests
+      const myRequests = (res.data || []).filter(r =>
+        r.employeeId === currentUser.id ||
+        r.employeeName === (currentUser.firstName + ' ' + currentUser.lastName).trim()
+      );
+
+      // Update local cache
+      leaveRequests[currentUser.id] = myRequests;
+
+      if (!myRequests.length) {
+        el.innerHTML = '<div class="empty">No requests submitted yet</div>';
+        return;
+      }
+
+      const scMap = { Pending:'badge-amber', Approved:'badge-green', Declined:'badge-red' };
+      el.innerHTML = myRequests.slice().reverse().map(r => {
+        const dateRange = r.from === r.to ? r.from : r.from + ' → ' + r.to;
+        const sc = scMap[r.status] || 'badge-amber';
+        const canCancel = r.status === 'Pending';
+        const reviewNote = (r.status === 'Approved' || r.status === 'Declined') && r.reviewedBy
+          ? `<div style="font-size:10px;color:var(--text3);margin-top:2px">${r.status} by ${r.reviewedBy}</div>`
+          : '';
+        return `
+          <div class="req-item">
+            <div class="req-icon" style="background:var(--green-bg)">🗓</div>
+            <div class="req-info">
+              <div class="req-title">${r.type}</div>
+              <div class="req-sub">${dateRange}${r.notes ? ' · ' + r.notes : ''}</div>
+              ${reviewNote}
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+              <span class="badge ${sc}">${r.status}</span>
+              ${canCancel
+                ? `<button class="btn btn-sm btn-act-red" style="font-size:10px;padding:3px 7px"
+                     onclick="cancelLeaveRequestServer('${r.id}')">Cancel</button>`
+                : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+  } catch (e) {
+    // Fallback to local cache
+    const uid = currentUser.id;
+    const requests = leaveRequests[uid] || [];
+    if (!requests.length) { el.innerHTML = '<div class="empty">No requests submitted yet</div>'; return; }
+    const scMap = { Pending:'badge-amber', Approved:'badge-green', Declined:'badge-red' };
+    el.innerHTML = requests.slice().reverse().map(r => {
+      const dateRange = r.from === r.to ? r.from : r.from + ' → ' + r.to;
+      const sc = scMap[r.status] || 'badge-amber';
+      return `<div class="req-item">
+        <div class="req-icon" style="background:var(--green-bg)">🗓</div>
+        <div class="req-info">
+          <div class="req-title">${r.type}</div>
+          <div class="req-sub">${dateRange}${r.notes ? ' · ' + r.notes : ''}</div>
+        </div>
         <span class="badge ${sc}">${r.status}</span>
-        ${canCancel?`<button class="btn btn-sm btn-act-red" style="font-size:10px;padding:3px 7px" onclick="cancelLeaveRequest(${realIdx})">Cancel</button>`:''}
-      </div>
-    </div>`;
-  }).join('');
+      </div>`;
+    }).join('');
+  }
 }
 
 function cancelLeaveRequest(idx) {
@@ -2029,6 +2117,118 @@ function cancelLeaveRequest(idx) {
   toast('Request cancelled.','amber');
   renderLeaveRequests();
 }
+
+// Cancel a leave request (calls server)
+async function cancelLeaveRequestServer(id) {
+  try {
+    const res = await apiPost('/api/leave-requests', {
+      action:     'review',
+      id,
+      status:     'Cancelled',
+      reviewedBy: (currentUser.firstName + ' ' + currentUser.lastName).trim(),
+    });
+    if (res.status === 'ok') {
+      toast('Request cancelled.', 'amber');
+      renderLeaveRequests();
+    } else {
+      toast('Failed to cancel. Please retry.', 'red');
+    }
+  } catch(e) {
+    toast('Network error.', 'red');
+  }
+}
+
+// Admin: render the leave requests panel
+async function renderAdminLeaveRequests() {
+  const el    = document.getElementById('admin-leave-list');
+  const badge = document.getElementById('admin-leave-badge');
+  if (!el) return;
+
+  try {
+    const res = await apiGet('/api/leave-requests');
+    if (res.status !== 'ok') throw new Error(res.message);
+
+    const adminDept   = (currentUser.dept || '').trim();
+    const isFullAdmin = !adminDept || adminDept === '—' || adminDept === 'Admin Office';
+
+    const requests = (res.data || []).filter(r =>
+      isFullAdmin || r.dept === adminDept
+    );
+
+    const pending = requests.filter(r => r.status === 'Pending');
+    if (badge) {
+      badge.textContent = pending.length + ' pending';
+      badge.className   = 'badge ' + (pending.length ? 'badge-amber' : 'badge-green');
+    }
+
+    if (!requests.length) {
+      el.innerHTML = '<div class="empty">No leave requests yet</div>';
+      return;
+    }
+
+    const scMap = { Pending:'badge-amber', Approved:'badge-green', Declined:'badge-red', Cancelled:'badge-red' };
+    el.innerHTML = requests.slice().reverse().map(r => {
+      const dateRange = r.from === r.to ? r.from : r.from + ' → ' + r.to;
+      const sc = scMap[r.status] || 'badge-amber';
+      const isPending = r.status === 'Pending';
+      return `
+        <div class="req-item" style="align-items:flex-start">
+          <div class="req-icon" style="background:var(--blue-bg);margin-top:2px">🗓</div>
+          <div class="req-info" style="flex:1">
+            <div class="req-title">${r.employeeName}</div>
+            <div class="req-sub" style="margin-bottom:3px">
+              ${r.type} · ${dateRange}
+              ${r.dept ? `<span style="margin-left:4px;font-size:10px;padding:1px 5px;border-radius:20px;
+                background:var(--blue-bg);color:var(--blue-t);font-weight:700;
+                font-family:var(--font-head)">${r.dept}</span>` : ''}
+            </div>
+            ${r.notes ? `<div style="font-size:11px;color:var(--text3);margin-bottom:4px">"${r.notes}"</div>` : ''}
+            ${!isPending && r.reviewedBy
+              ? `<div style="font-size:10px;color:var(--text3)">${r.status} by ${r.reviewedBy} · ${(r.reviewedAt||'').slice(0,10)}</div>`
+              : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+            <span class="badge ${sc}">${r.status}</span>
+            ${isPending ? `
+              <div style="display:flex;gap:4px">
+                <button class="btn btn-sm btn-act-green"
+                  onclick="adminReviewLeave('${r.id}','Approved',this)">✓ Approve</button>
+                <button class="btn btn-sm btn-act-red"
+                  onclick="adminReviewLeave('${r.id}','Declined',this)">✕ Decline</button>
+              </div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+  } catch(e) {
+    if (el) el.innerHTML = '<div class="empty">Could not load leave requests</div>';
+  }
+}
+
+// Admin: approve or decline a leave request
+async function adminReviewLeave(id, status, btn) {
+  btn.disabled = true;
+  try {
+    const res = await apiPost('/api/leave-requests', {
+      action:     'review',
+      id,
+      status,
+      reviewedBy: (currentUser.firstName + ' ' + currentUser.lastName).trim(),
+    });
+    if (res.status === 'ok') {
+      toast(`Leave request ${status.toLowerCase()}!`, status === 'Approved' ? 'green' : 'red');
+      addNotif(`Leave request ${status.toLowerCase()} for an employee.`, status === 'Approved' ? 'success' : 'warning');
+      renderAdminLeaveRequests();
+    } else {
+      toast('Failed: ' + (res.message || 'Unknown error'), 'red');
+    }
+  } catch(e) {
+    toast('Network error. Please retry.', 'red');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 
 function renderOpenShifts() {
   const el=document.getElementById('open-shifts-list');
