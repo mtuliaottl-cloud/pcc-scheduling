@@ -21,6 +21,20 @@ function cors(res) {
 }
 
 async function ensureHeader(sheets) {
+  // 1. Ensure the tab exists  ← ADD THIS BLOCK
+  const meta = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
+  const tabExists = meta.data.sheets.some(s => s.properties.title === TAB);
+
+  if (!tabExists) {
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: SHEET_ID,
+      requestBody: {
+        requests: [{ addSheet: { properties: { title: TAB } } }]
+      },
+    });
+  }
+
+  // 2. Ensure header row exists  ← your existing code below
   const r = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
     range: `${TAB}!A1:L1`,
