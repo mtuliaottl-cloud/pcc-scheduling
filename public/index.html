@@ -1347,6 +1347,7 @@ function onConcernChange() {
   document.getElementById('booking-summary-empty').style.display = 'block';
   document.getElementById('booking-summary-filled').style.display = 'none';
   selectedStaffObj = null; selectedTime = null;
+  renderStudentCalendar(); // re-render so blocked dates update per concern
 
   const concern = document.getElementById('concern-type-early').value;
   const dept = CONCERN_DEPT[concern] || '';
@@ -3061,18 +3062,26 @@ async function loadBlockedDates() {
 
 function isDateBlocked(dateStr) {
   if (!currentUser) return false;
-  // Students see ALL blocked dates regardless of dept
-  if (currentUser.role === 'student') {
-    return blockedDates.some(b => b.date === dateStr);
+  if (currentUser.role === 'employee' || currentUser.role === 'admin') {
+    const dept = (currentUser.dept || '').trim();
+    return blockedDates.some(b =>
+      b.date === dateStr &&
+      (b.dept === dept || b.dept === 'All' || !b.dept)
+    );
   }
-  // Employees/admins only see blocks for their dept
-  const dept = (currentUser.dept || '').trim();
-  return blockedDates.some(b =>
-    b.date === dateStr &&
-    (b.dept === dept || b.dept === 'All' || !b.dept)
-  );
+  if (currentUser.role === 'student') {
+    const concern = document.getElementById('concern-type-early')?.value || '';
+    if (!concern) {
+      return blockedDates.some(b => b.date === dateStr && (b.dept === 'All' || !b.dept));
+    }
+    const targetDept = CONCERN_DEPT[concern] || '';
+    return blockedDates.some(b =>
+      b.date === dateStr &&
+      (b.dept === targetDept || b.dept === 'All' || !b.dept)
+    );
+  }
+  return false;
 }
-
 
 function getBlockedEntry(dateStr) {
   const dept = (currentUser?.dept || '').trim();
