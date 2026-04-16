@@ -2693,7 +2693,17 @@ function nextStudentMonth(){if(++stuMonth>11){stuMonth=0;stuYear++;}renderStuden
 // ═══════════════════════════════════════════════════════
 let _pendingDateY, _pendingDateM, _pendingDateD;
 
+
 function selectStudentDate(y,m,d){
+  const dateStr2=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  
+  // Block check — stop students from booking blocked dates
+  if(isDateBlocked(dateStr2)){
+    const entry = getBlockedEntry(dateStr2);
+    toast('This date is blocked: ' + (entry?.reason || 'Unavailable'), 'red');
+    return; // Exit early, don't open modal
+  }
+
   _pendingDateY=y; _pendingDateM=m; _pendingDateD=d;
   const dow=new Date(y,m,d).getDay();
   const dayName=DAYS_SH[dow];
@@ -2701,6 +2711,7 @@ function selectStudentDate(y,m,d){
 
   document.getElementById('modal-date-title').textContent=dateStr+' ('+dayName+')';
   document.getElementById('modal-date-sub').textContent='faculty availability for this day';
+  
 
   const concern = document.getElementById('concern-type-early')?.value || '';
   const staffData=getStaffAvailForDay(dayName, concern);
