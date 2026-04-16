@@ -1,8 +1,4 @@
-// api/appointments.js  — Vercel Serverless Function
-// GET  → list all appointments
-// POST { action:"append", row:[...] }  → create appointment
-// POST { action:"update", row:[...] }  → update appointment status
-
+// api/appointments.js
 import { google } from 'googleapis';
 
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
@@ -28,17 +24,16 @@ function cors(res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-
 async function ensureHeader(sheets) {
-  // 1. Ensure the tab itself exists
+  // 1. Ensure the tab exists
   const meta = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
   const tabExists = meta.data.sheets.some(s => s.properties.title === APPT_TAB);
-  
+
   if (!tabExists) {
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: SHEET_ID,
-      requestBody: { 
-        requests: [{ addSheet: { properties: { title: APPT_TAB } } }] 
+      requestBody: {
+        requests: [{ addSheet: { properties: { title: APPT_TAB } } }]
       },
     });
   }
@@ -81,13 +76,11 @@ export default async function handler(req, res) {
     const sheets = getSheets();
     await ensureHeader(sheets);
 
-    // ── GET: list all ─────────────────────────────────────────
     if (req.method === 'GET') {
       const data = await getAllRows(sheets);
       return res.status(200).json({ status: 'ok', data });
     }
 
-    // ── POST ──────────────────────────────────────────────────
     if (req.method === 'POST') {
       const { action, row } = req.body || {};
 
@@ -95,7 +88,6 @@ export default async function handler(req, res) {
         return res.status(400).json({ status: 'error', message: 'Invalid row data' });
       }
 
-      // UPDATE: find by Appointment ID (col A) and overwrite
       if (action === 'update') {
         const allRes = await sheets.spreadsheets.values.get({
           spreadsheetId: SHEET_ID,
@@ -116,10 +108,8 @@ export default async function handler(req, res) {
           });
           return res.status(200).json({ status: 'ok', message: 'updated' });
         }
-        // ID not found — fall through to append
       }
 
-      // APPEND (new booking, or update fallback)
       await sheets.spreadsheets.values.append({
         spreadsheetId: SHEET_ID,
         range: `${APPT_TAB}!A:O`,
