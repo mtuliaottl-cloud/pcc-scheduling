@@ -1655,6 +1655,7 @@ function showView(name) {
 // ═══════════════════════════════════════════════════════
 async function loadData() {
   try {
+     await loadBlockedDates(); // ← ADD THIS LINE
     const [apptRes, userRes] = await Promise.all([
       apiGet(API.appointments),
       apiGet(API.users),
@@ -3069,17 +3070,18 @@ function isDateBlocked(dateStr) {
       (b.dept === dept || b.dept === 'All' || !b.dept)
     );
   }
-  if (currentUser.role === 'student') {
-    const concern = document.getElementById('concern-type-early')?.value || '';
-    if (!concern) {
-      return blockedDates.some(b => b.date === dateStr && (b.dept === 'All' || !b.dept));
-    }
-    const targetDept = CONCERN_DEPT[concern] || '';
-    return blockedDates.some(b =>
-      b.date === dateStr &&
-      (b.dept === targetDept || b.dept === 'All' || !b.dept)
-    );
+if (currentUser.role === 'student') {
+  const concern = document.getElementById('concern-type-early')?.value || '';
+  if (!concern) {
+    // Show ALL blocked dates as a warning even before concern is chosen
+    return blockedDates.some(b => b.date === dateStr);
   }
+  const targetDept = CONCERN_DEPT[concern] || '';
+  return blockedDates.some(b =>
+    b.date === dateStr &&
+    (b.dept === targetDept || b.dept === 'All' || !b.dept)
+  );
+}
   return false;
 }
 
