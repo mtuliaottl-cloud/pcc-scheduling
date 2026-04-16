@@ -2621,10 +2621,13 @@ function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
 const fullBook=type==='student'&&work&&bookedDays.includes(d);
 const clickable=work&&!fullBook&&type==='student'&&!isPast;
     const dateStrCheck=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-const onclick = type==='student'&&clickable
+const isBlocked = isDateBlocked(dateStrCheck);
+const onclick = type==='student'&&clickable&&!isBlocked
   ? (currentUser?.role==='admin'
       ? `onclick="openAdminBlockModal(${year},${month},${d})"`
       : `onclick="selectStudentDate(${year},${month},${d})"`)
+  : type==='student'&&isBlocked&&currentUser?.role==='admin'
+  ? `onclick="openAdminBlockModal(${year},${month},${d})"`
   : type==='emp'&&isWorkDay(year,month,d)&&markedAppts.some(a=>a['Date']===dateStrCheck)
   ? `onclick="showEmpDayModal('${dateStrCheck}')"`
   : '';
@@ -2711,7 +2714,7 @@ function selectStudentDate(y,m,d){
 
   document.getElementById('modal-date-title').textContent=dateStr+' ('+dayName+')';
   document.getElementById('modal-date-sub').textContent='faculty availability for this day';
-  
+
 
   const concern = document.getElementById('concern-type-early')?.value || '';
   const staffData=getStaffAvailForDay(dayName, concern);
