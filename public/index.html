@@ -3170,20 +3170,14 @@ async function confirmBlockDate() {
 
 async function unblockDate() {
   if (!_blockingDate) return;
-  const adminDept = (currentUser.dept || 'All').trim();
-
-  // Find the block entry that belongs to this admin's dept
-  const existing = blockedDates.find(b =>
-    b.date === _blockingDate &&
-    (b.dept === adminDept || b.dept === 'All' || !b.dept)
-  );
-  if (!existing) return toast('No block found for your department on this date.', 'amber');
+  const existing = getBlockedEntry(_blockingDate);
+  if (!existing) return;
 
   try {
     const res = await apiPost('/api/blocked-dates', { action: 'unblock', id: existing.id });
     if (res.status === 'ok') {
       blockedDates = blockedDates.filter(b => b.id !== existing.id);
-      toast('Date unblocked for ' + adminDept + '. Students can now book again.', 'green');
+      toast('Date unblocked. Students can now book again.', 'green');
       closeBlockModal();
       renderStudentCalendar();
     } else {
