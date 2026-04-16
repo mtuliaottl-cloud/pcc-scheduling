@@ -1343,11 +1343,12 @@ function closeEmpWelcome() {
 }
 
 function onConcernChange() {
+   renderStudentCalendar(); // re-render so blocked dates update per concern
     document.getElementById('time-slot-card').style.display = 'none';
   document.getElementById('booking-summary-empty').style.display = 'block';
   document.getElementById('booking-summary-filled').style.display = 'none';
   selectedStaffObj = null; selectedTime = null;
-  renderStudentCalendar(); // re-render so blocked dates update per concern
+ 
 
   const concern = document.getElementById('concern-type-early').value;
   const dept = CONCERN_DEPT[concern] || '';
@@ -2623,12 +2624,13 @@ function renderCalendar(gridId,headId,titleId,year,month,type,markedAppts=[]) {
 const fullBook=type==='student'&&work&&bookedDays.includes(d);
 const clickable=work&&!fullBook&&type==='student'&&!isPast;
     const dateStrCheck=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-const isBlocked = isDateBlocked(dateStrCheck);
+const concern = document.getElementById('concern-type-early')?.value || '';
+const isBlocked = concern ? isDateBlocked(dateStrCheck) : false;
 const onclick = type==='student'&&clickable&&!isBlocked
-  ? (currentUser?.role==='admin'
-      ? `onclick="openAdminBlockModal(${year},${month},${d})"`
-      : `onclick="selectStudentDate(${year},${month},${d})"`)
+  ? `onclick="selectStudentDate(${year},${month},${d})"`
   : type==='student'&&isBlocked&&currentUser?.role==='admin'
+  ? `onclick="openAdminBlockModal(${year},${month},${d})"`
+  : type==='student'&&!isBlocked&&currentUser?.role==='admin'&&clickable
   ? `onclick="openAdminBlockModal(${year},${month},${d})"`
   : type==='emp'&&isWorkDay(year,month,d)&&markedAppts.some(a=>a['Date']===dateStrCheck)
   ? `onclick="showEmpDayModal('${dateStrCheck}')"`
@@ -2649,10 +2651,10 @@ if(!work||isPast&&type==='student'){
       bg='#fff3cd'; color='#856404'; border='2px solid #ffc107';
       label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">FULL</div>';
       cursor='not-allowed';
-    } else if(type==='student' && isDateBlocked(dateStrCheck)){
-      bg='#f3e8ff'; color='#7c3aed'; border='2px solid #a855f7';
-      label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">BLOCKED</div>';
-      cursor = currentUser?.role==='admin' ? 'pointer' : 'not-allowed';
+} else if(type==='student' && isBlocked){
+  bg='#f3e8ff'; color='#7c3aed'; border='2px solid #a855f7';
+  label='<div style="font-size:9px;font-weight:800;margin-top:2px;font-family:var(--font-head)">BLOCKED</div>';
+  cursor = currentUser?.role==='admin' ? 'pointer' : 'not-allowed';
     } else if(type==='emp'){
       const dateStr=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       const hasAppt=markedAppts.some(a=>a['Date']===dateStr);
@@ -2703,7 +2705,8 @@ function selectStudentDate(y,m,d){
   const dateStr2=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
   
   // Block check — stop students from booking blocked dates
-  if(isDateBlocked(dateStr2)){
+const concern = document.getElementById('concern-type-early')?.value || '';
+if(concern && isDateBlocked(dateStr2)){
     const entry = getBlockedEntry(dateStr2);
     toast('This date is blocked: ' + (entry?.reason || 'Unavailable'), 'red');
     return; // Exit early, don't open modal
@@ -2717,8 +2720,6 @@ function selectStudentDate(y,m,d){
   document.getElementById('modal-date-title').textContent=dateStr+' ('+dayName+')';
   document.getElementById('modal-date-sub').textContent='faculty availability for this day';
 
-
-  const concern = document.getElementById('concern-type-early')?.value || '';
   const staffData=getStaffAvailForDay(dayName, concern);
   const available=staffData.filter(s=>s.avail);
   const absent=staffData.filter(s=>!s.avail);
