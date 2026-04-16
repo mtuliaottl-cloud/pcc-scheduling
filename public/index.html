@@ -825,6 +825,56 @@ select.field{cursor:pointer;}textarea.field{resize:none;}
   </div>
 </div>
 
+<!-- ADMIN WELCOME POPUP -->
+<div id="admin-welcome-modal" style="display:none;position:fixed;inset:0;z-index:9999;
+     background:rgba(0,0,0,.5);backdrop-filter:blur(6px);
+     align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);
+              border-radius:20px;padding:28px;width:480px;max-width:95vw;
+              max-height:85vh;overflow-y:auto;
+              box-shadow:0 24px 60px rgba(0,0,0,.2);animation:authIn .3s ease both">
+
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:44px;margin-bottom:10px">⚡</div>
+      <div style="font-family:var(--font-head);font-weight:900;font-size:20px;
+                  margin-bottom:6px" id="admin-welcome-title">Welcome back!</div>
+      <div style="font-size:12px;color:var(--text2)" id="admin-welcome-sub"></div>
+    </div>
+
+    <!-- KPI SUMMARY STRIP -->
+    <div id="admin-welcome-kpis"
+         style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px"></div>
+
+    <!-- PENDING APPOINTMENTS -->
+    <div id="admin-welcome-pending-wrap" style="margin-bottom:14px">
+      <div style="font-family:var(--font-head);font-weight:800;font-size:11px;
+                  text-transform:uppercase;letter-spacing:.06em;color:var(--text3);
+                  margin-bottom:8px">⏳ Pending appointments</div>
+      <div id="admin-welcome-pending-list"></div>
+    </div>
+
+    <!-- PENDING LEAVE REQUESTS -->
+    <div id="admin-welcome-leave-wrap" style="margin-bottom:20px">
+      <div style="font-family:var(--font-head);font-weight:800;font-size:11px;
+                  text-transform:uppercase;letter-spacing:.06em;color:var(--text3);
+                  margin-bottom:8px">🗓 Pending leave requests</div>
+      <div id="admin-welcome-leave-list"></div>
+    </div>
+
+    <!-- TODAY'S BOOKINGS -->
+    <div id="admin-welcome-today-wrap" style="margin-bottom:20px">
+      <div style="font-family:var(--font-head);font-weight:800;font-size:11px;
+                  text-transform:uppercase;letter-spacing:.06em;color:var(--text3);
+                  margin-bottom:8px">📅 Today's bookings</div>
+      <div id="admin-welcome-today-list"></div>
+    </div>
+
+    <button class="btn-primary" style="border-radius:var(--r)"
+            onclick="closeAdminWelcome()">Got it, let's go! →</button>
+  </div>
+</div>
+
+
 <!-- ADMIN BLOCK DATE MODAL -->
 <div id="block-date-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(5px);align-items:center;justify-content:center">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:26px;width:460px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.2);animation:authIn .3s ease both">
@@ -1626,12 +1676,18 @@ async function loadData() {
     const pending = allAppts.filter(a=>a['Status']==='Pending').length;
     document.getElementById('notif-dot').style.display = pending ? '' : 'none';
 
-    if (currentUser?.role==='admin')   renderAdminView();
+if (currentUser?.role==='admin') {
+  renderAdminView();
+  renderAdminLeaveRequests();
+  if (!window._adminWelcomeShown) {
+    window._adminWelcomeShown = true;
+    setTimeout(() => showAdminWelcomePopup(), 900);
+  }
+}
 if (currentUser?.role==='student') renderStudentAppts();
 if (currentUser?.role==='employee') {
   renderEmployeeView();
-  renderLeaveRequests(); 
- 
+  renderLeaveRequests();
   if (!window._welcomeShown) {
     window._welcomeShown = true;
     setTimeout(() => showEmpWelcomePopup(), 800);
@@ -3118,6 +3174,128 @@ function toggleEmpAppts() {
     body.style.opacity   = '1';
     chevron.style.transform = 'rotate(180deg)';
   }
+}
+
+async function showAdminWelcomePopup() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+
+  const hour  = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  document.getElementById('admin-welcome-title').textContent =
+    `${greet}, ${currentUser.firstName}! ⚡`;
+  document.getElementById('admin-welcome-sub').textContent =
+    `Here's your dashboard summary — ${new Date().toLocaleDateString('en-PH',
+      {weekday:'long', month:'long', day:'numeric'})}`;
+
+  // KPIs
+  const adminDept    = (currentUser.dept || '').trim();
+  const isFullAdmin  = !adminDept || adminDept === '—' || adminDept === 'Admin Office';
+  const visibleAppts = isFullAdmin ? allAppts
+    : allAppts.filter(a => CONCERN_DEPT[a['Concern']] === adminDept);
+  const pending      = visibleAppts.filter(a => a['Status'] === 'Pending');
+  const todayAppts   = visibleAppts.filter(a => a['Date'] === todayStr);
+  const confirmed    = visibleAppts.filter(a => a['Status'] === 'Confirmed');
+
+  document.getElementById('admin-welcome-kpis').innerHTML = `
+    <div style="text-align:center;padding:12px;background:var(--amber-bg);border-radius:var(--r)">
+      <div style="font-size:24px;font-weight:900;color:var(--amber-t);font-family:var(--font-head)">${pending.length}</div>
+      <div style="font-size:11px;color:var(--text2)">Pending</div>
+    </div>
+    <div style="text-align:center;padding:12px;background:var(--blue-bg);border-radius:var(--r)">
+      <div style="font-size:24px;font-weight:900;color:var(--blue-t);font-family:var(--font-head)">${todayAppts.length}</div>
+      <div style="font-size:11px;color:var(--text2)">Today</div>
+    </div>
+    <div style="text-align:center;padding:12px;background:var(--green-bg);border-radius:var(--r)">
+      <div style="font-size:24px;font-weight:900;color:var(--green-t);font-family:var(--font-head)">${confirmed.length}</div>
+      <div style="font-size:11px;color:var(--text2)">Confirmed</div>
+    </div>`;
+
+  // Pending appointments list
+  const pendingWrap = document.getElementById('admin-welcome-pending-wrap');
+  const pendingList = document.getElementById('admin-welcome-pending-list');
+  if (pending.length) {
+    pendingList.innerHTML = pending.slice(0, 4).map(a => `
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;
+                  background:var(--amber-bg);border:1px solid rgba(230,168,23,.2);
+                  border-radius:var(--r);margin-bottom:6px">
+        <div style="font-size:16px">⏳</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-family:var(--font-head);font-size:12px">${a['Full Name']}</div>
+          <div style="font-size:11px;color:var(--text2)">${a['Date']} · ${a['Time']} · ${a['Concern']}</div>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-sm btn-act-green"
+            onclick="updateApptStatus('${a['Appointment ID']}','Confirmed',this);loadData()">✓</button>
+          <button class="btn btn-sm btn-act-red"
+            onclick="updateApptStatus('${a['Appointment ID']}','Cancelled',this);loadData()">✕</button>
+        </div>
+      </div>`).join('');
+    if (pending.length > 4)
+      pendingList.innerHTML += `<div style="text-align:center;font-size:11px;color:var(--text3);padding:4px">+${pending.length - 4} more</div>`;
+  } else {
+    pendingWrap.innerHTML += `<div style="font-size:12px;color:var(--text3);padding:8px 0">No pending appointments</div>`;
+  }
+
+  // Today's bookings
+  const todayWrap = document.getElementById('admin-welcome-today-wrap');
+  const todayList = document.getElementById('admin-welcome-today-list');
+  if (todayAppts.length) {
+    todayList.innerHTML = todayAppts.slice(0, 3).map(a => `
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;
+                  background:var(--bg2);border:1px solid var(--border);
+                  border-radius:var(--r);margin-bottom:6px">
+        <div style="font-size:16px">📅</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-family:var(--font-head);font-size:12px">${a['Full Name']}</div>
+          <div style="font-size:11px;color:var(--text2)">${a['Time']} · ${a['Specific Person']} · ${a['Concern']}</div>
+        </div>
+        <span class="badge ${{Confirmed:'badge-green',Pending:'badge-amber',Cancelled:'badge-red'}[a['Status']]||'badge-amber'}">${a['Status']}</span>
+      </div>`).join('');
+  } else {
+    todayWrap.style.display = 'none';
+  }
+
+  // Leave requests
+  const leaveWrap = document.getElementById('admin-welcome-leave-wrap');
+  const leaveList = document.getElementById('admin-welcome-leave-list');
+  try {
+    const res = await apiGet('/api/leave-requests');
+    const allLeave = (res.data || []).filter(r =>
+      r.status === 'Pending' && (isFullAdmin || r.dept === adminDept)
+    );
+    if (allLeave.length) {
+      leaveList.innerHTML = allLeave.slice(0, 3).map(r => `
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;
+                    background:var(--purple-bg);border:1px solid rgba(124,92,252,.2);
+                    border-radius:var(--r);margin-bottom:6px">
+          <div style="font-size:16px">🗓</div>
+          <div style="flex:1">
+            <div style="font-weight:800;font-family:var(--font-head);font-size:12px">${r.employeeName}</div>
+            <div style="font-size:11px;color:var(--text2)">${r.type} · ${r.from} → ${r.to}</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-sm btn-act-green"
+              onclick="adminReviewLeave('${r.id}','Approved',this)">✓</button>
+            <button class="btn btn-sm btn-act-red"
+              onclick="adminReviewLeave('${r.id}','Declined',this)">✕</button>
+          </div>
+        </div>`).join('');
+      if (allLeave.length > 3)
+        leaveList.innerHTML += `<div style="text-align:center;font-size:11px;color:var(--text3);padding:4px">+${allLeave.length - 3} more in Leave Requests panel</div>`;
+    } else {
+      leaveWrap.innerHTML += `<div style="font-size:12px;color:var(--text3);padding:8px 0">No pending leave requests</div>`;
+    }
+  } catch(e) {
+    leaveWrap.style.display = 'none';
+  }
+
+  document.getElementById('admin-welcome-modal').style.display = 'flex';
+}
+
+function closeAdminWelcome() {
+  document.getElementById('admin-welcome-modal').style.display = 'none';
 }
 
 
