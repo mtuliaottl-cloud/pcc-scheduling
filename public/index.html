@@ -3058,14 +3058,21 @@ async function loadBlockedDates() {
   }
 }
 
+
 function isDateBlocked(dateStr) {
   if (!currentUser) return false;
+  // Students see ALL blocked dates regardless of dept
+  if (currentUser.role === 'student') {
+    return blockedDates.some(b => b.date === dateStr);
+  }
+  // Employees/admins only see blocks for their dept
   const dept = (currentUser.dept || '').trim();
   return blockedDates.some(b =>
     b.date === dateStr &&
     (b.dept === dept || b.dept === 'All' || !b.dept)
   );
 }
+
 
 function getBlockedEntry(dateStr) {
   const dept = (currentUser?.dept || '').trim();
